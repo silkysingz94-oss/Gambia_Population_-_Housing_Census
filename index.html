@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ANSUMANA ADAMA NATO SINGHATEH | POPULATION ANALYTICS & STATISTICS</title>
+<title>SILKYSINGZ | POPULATION ANALYTICS & STATISTICS</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -56,7 +56,7 @@ main{
  height:calc(100vh - 78px);
  min-height:650px;
  display:grid;
- grid-template-columns:minmax(245px,.85fr) minmax(350px,1.2fr) minmax(330px,1.15fr);
+ grid-template-columns:repeat(3,minmax(0,1fr));
  gap:10px;padding:10px;
 }
 .panel{
@@ -125,10 +125,17 @@ button{
  position:absolute;z-index:500;bottom:20px;left:10px;
  background:#fff;padding:10px 12px;border-radius:7px;
  box-shadow:var(--shadow);font-size:10px;line-height:1.8;
- max-width:230px;max-height:42%;overflow:auto;
+ max-width:255px;max-height:55%;overflow:auto;
 }
 .legend-row{display:flex;align-items:center;gap:7px}
-.swatch{width:13px;height:10px;border:1px solid #777;display:inline-block;flex-shrink:0}
+.swatch{
+ width:13px;height:10px;border:1px solid #777;
+ display:inline-block;flex-shrink:0;
+}
+.legend-heading{
+ font-weight:700;margin-top:8px;
+ border-top:1px solid #e3eaf0;padding-top:5px;
+}
 .kpi-grid{
  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
 }
@@ -178,6 +185,7 @@ th:first-child,td:first-child{text-align:left}
 </head>
 
 <body>
+
 <header>
  <div class="brand">
   <div class="flag"></div>
@@ -194,9 +202,7 @@ th:first-child,td:first-child{text-align:left}
 
 <main>
 
-<!-- =====================================================
-     LEFT PANEL: CONTROLS
-====================================================== -->
+<!-- LEFT PANEL -->
 <section class="panel">
  <div class="panel-heading">
   <span>Controls & Data</span>
@@ -215,6 +221,7 @@ th:first-child,td:first-child{text-align:left}
   <div id="loadStatus" class="status">Waiting for GeoJSON data...</div>
 
   <div class="section-title">Analysis settings</div>
+
   <label>Analysis year</label>
   <select id="yearSelect">
    <option value="1973">1973 – LGA level</option>
@@ -249,8 +256,9 @@ th:first-child,td:first-child{text-align:left}
    <label class="check-item"><input type="checkbox" id="layerHouseholds"> Households</label>
    <label class="check-item"><input type="checkbox" id="layerCompounds"> Compounds</label>
   </div>
+
   <div class="small-note">
-   The primary indicator controls polygon fill. Additional selected layers are displayed as coloured polygon outlines. Every selected layer appears in the map legend.
+   The primary indicator controls polygon fill. Additional selected indicators are displayed as coloured outlines. The legend identifies each selected indicator.
   </div>
 
   <label>Basemap</label>
@@ -276,8 +284,9 @@ th:first-child,td:first-child{text-align:left}
    <option value="radar">Radar chart</option>
    <option value="polarArea">Polar area chart</option>
   </select>
+
   <div class="small-note">
-   The chart type selection updates all five analytics charts.
+   Chart type selection updates the comparison, share, growth and density charts. The historical trend remains a line chart.
   </div>
 
   <div class="section-title">Export</div>
@@ -288,30 +297,30 @@ th:first-child,td:first-child{text-align:left}
 
   <div class="section-title">Methodology</div>
   <div class="method">
-   <b>Historical 1973–2003:</b> population density is calculated and displayed at LGA level using the embedded historical population and LGA area values.
+   <b>1973–2003:</b> historical population and density use LGA totals and the embedded historical LGA area values. EA boundaries are used only to display the LGA-level results geographically.
    <br><br>
-   <b>2013 EA density:</b> <code>sum_POP / Area_sqkm</code>.
+   <b>2013 EA population:</b> <code>sum_POP</code>.
    <br>
-   <b>2024 EA density:</b> <code>enum_pop / Area_sqkm</code>.
-   <br><br>
-   <b>2024 households:</b> <code>enum_hhs</code>.
+   <b>2024 EA population:</b> <code>enum_pop</code>.
    <br>
-   <b>2024 compounds:</b> <code>comp_map</code>.
+   <b>EA density:</b> EA population divided by <code>Area_sqkm</code>.
    <br><br>
-   Geometry from the uploaded GeoJSON is converted from EPSG:3857 to EPSG:4326 for Leaflet.
+   <b>Households:</b> <code>sum_HHS</code> (2013) and <code>enum_hhs</code> (2024).
+   <br>
+   <b>Compounds:</b> <code>Point_Count</code> (2013) and <code>comp_map</code> (2024).
+   <br><br>
+   GeoJSON coordinates are converted from EPSG:3857 to EPSG:4326 for Leaflet display.
   </div>
 
   <div class="credit">
    <b>Produced by Ansu Singhateh</b><br>
-   GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics<br>
-   SILKYSINGZ • Research and educational use
+   GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+   GBoS GEOAI • Research and educational use
   </div>
  </div>
 </section>
 
-<!-- =====================================================
-     CENTRE PANEL: MAP
-====================================================== -->
+<!-- MAP PANEL -->
 <section class="panel map-panel">
  <div class="panel-heading">
   <span>Interactive Map</span>
@@ -325,14 +334,12 @@ th:first-child,td:first-child{text-align:left}
   </div>
   <div class="map-legend" id="mapLegend">
    <b>Map legend</b><br>
-   Select map layers to display their legends.
+   Waiting for data...
   </div>
  </div>
 </section>
 
-<!-- =====================================================
-     RIGHT PANEL: ANALYTICS
-====================================================== -->
+<!-- ANALYTICS PANEL -->
 <section class="panel">
  <div class="panel-heading">
   <span>Population Analytics & Statistics</span>
@@ -345,32 +352,32 @@ th:first-child,td:first-child{text-align:left}
   <div class="kpi-grid">
    <div class="kpi">
     <div class="k-label">Population</div>
-    <div class="k-value" id="kPopulation">2,528,803</div>
+    <div class="k-value" id="kPopulation">—</div>
     <div class="k-sub">Persons</div>
    </div>
    <div class="kpi">
     <div class="k-label">Population density</div>
-    <div class="k-value" id="kDensity">238.7</div>
+    <div class="k-value" id="kDensity">—</div>
     <div class="k-sub">Persons per km²</div>
    </div>
    <div class="kpi">
     <div class="k-label">Households</div>
-    <div class="k-value" id="kHouseholds">298,364</div>
+    <div class="k-value" id="kHouseholds">—</div>
     <div class="k-sub">Households</div>
    </div>
    <div class="kpi">
     <div class="k-label">Compounds</div>
-    <div class="k-value" id="kCompounds">326,404</div>
+    <div class="k-value" id="kCompounds">—</div>
     <div class="k-sub">Compounds</div>
    </div>
    <div class="kpi">
     <div class="k-label">Land area</div>
-    <div class="k-value" id="kArea">10,593.51</div>
+    <div class="k-value" id="kArea">—</div>
     <div class="k-sub">Square kilometres</div>
    </div>
    <div class="kpi">
     <div class="k-label">Enumeration areas</div>
-    <div class="k-value" id="kEAs">4,936</div>
+    <div class="k-value" id="kEAs">—</div>
     <div class="k-sub">EA features</div>
    </div>
   </div>
@@ -378,7 +385,7 @@ th:first-child,td:first-child{text-align:left}
   <div class="section-title">Population trend by LGA</div>
   <div class="chart-card">
    <div class="chart-title">Historical population trend (1973–2024)</div>
-   <div class="chart-subtitle">Population by LGA across census years</div>
+   <div class="chart-subtitle">LGA totals across census years</div>
    <div class="chart-box"><canvas id="trendChart"></canvas></div>
   </div>
 
@@ -406,7 +413,7 @@ th:first-child,td:first-child{text-align:left}
   <div class="section-title">Population density</div>
   <div class="chart-card">
    <div class="chart-title">Population density by LGA (people/km²)</div>
-   <div class="chart-subtitle">Historical LGA density and 2024 EA-aggregated density</div>
+   <div class="chart-subtitle">Historical LGA density and EA-aggregated density for 2013 and 2024</div>
    <div class="chart-box"><canvas id="densityChart"></canvas></div>
   </div>
 
@@ -422,73 +429,74 @@ th:first-child,td:first-child{text-align:left}
      </tr>
     </thead>
     <tbody id="summaryTable">
-     <tr><td colspan="4">Loading data...</td></tr>
+     <tr><td colspan="4">Waiting for data...</td></tr>
     </tbody>
    </table>
   </div>
 
   <div class="section-title">Methodology and notes</div>
   <div class="method" id="interpretation">
-   2024 EA analysis: Population is aggregated from enum_pop, households from enum_hhs and compounds from comp_map. Population density is calculated as aggregated enum_pop divided by the sum of Area_sqkm for the selected EA features. All eight LGAs are included in the aggregation where records exist. EA boundaries are displayed from the uploaded GeoJSON.
+   Load the GeoJSON to begin the analysis.
   </div>
 
   <div class="credit">
    <b>Produced by Ansu Singhateh</b><br>
    GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics<br>
-   Silkysingz GEOAI • Research and educational use
+   SILKYSINGZ GEOAI • Research and educational use
   </div>
  </div>
 </section>
+
 </main>
 
 <script>
 /* =========================================================
-   1. HISTORICAL POPULATION DATA
-====================================================== */
+   1. HISTORICAL LGA DATA
+========================================================= */
 
 const YEARS=[1973,1983,1993,2003,2013,2024];
 
 const HIST={
-"Kerewan":{
- pop:[93388,112225,156462,172835,220080],
- density:[41,50,69,77,98],
- area:2255.50
-},
-"Banjul":{
- pop:[39179,44188,42326,35061,31054],
- density:[3204,3613,3461,2867,2539],
- area:12.23
-},
-"Kanifing":{
- pop:[39404,101504,228214,322735,377134],
- density:[522,1344,3021,4272,4992],
- area:75.55
-},
-"Brikama":{
- pop:[91013,137245,234917,389594,688744],
- density:[52,78,133,221,390],
- area:1764.25
-},
-"Mansakonko":{
- pop:[42447,55263,65146,72167,81042],
- density:[26,34,41,445,50],
- area:1608.00
-},
-"Kuntaur":{
- pop:[47669,57594,67774,78491,96703],
- density:[33,39,46,54,66],
- area:1466.50
-},
-"Janjanbureh":{
- pop:[54232,68410,88247,107212,125204],
- density:[38,48,62,75,88],
- area:1427.75
-},
-"Basse":{
- pop:[86167,111388,155059,182586,237220],
- density:[42,54,75,88,115],
- area:2069.50
-}
+ "Kerewan":{
+  pop:[93388,112225,156462,172835,220080],
+  density:[41,50,69,77,98],
+  area:2255.50
+ },
+ "Banjul":{
+  pop:[39179,44188,42326,35061,31054],
+  density:[3204,3613,3461,2867,2539],
+  area:12.23
+ },
+ "Kanifing":{
+  pop:[39404,101504,228214,322735,377134],
+  density:[522,1344,3021,4272,4992],
+  area:75.55
+ },
+ "Brikama":{
+  pop:[91013,137245,234917,389594,688744],
+  density:[52,78,133,221,390],
+  area:1764.25
+ },
+ "Mansakonko":{
+  pop:[42447,55263,65146,72167,81042],
+  density:[26,34,41,445,50],
+  area:1608.00
+ },
+ "Kuntaur":{
+  pop:[47669,57594,67774,78491,96703],
+  density:[33,39,46,54,66],
+  area:1466.50
+ },
+ "Janjanbureh":{
+  pop:[54232,68410,88247,107212,125204],
+  density:[38,48,62,75,88],
+  area:1427.75
+ },
+ "Basse":{
+  pop:[86167,111388,155059,182586,237220],
+  density:[42,54,75,88,115],
+  area:2069.50
+ }
 };
 
 const LGA_NAMES=[
@@ -496,23 +504,24 @@ const LGA_NAMES=[
  "Kanifing","Kerewan","Kuntaur","Mansakonko"
 ];
 
-/* 2024 LGA totals from the supplied GeoJSON EA aggregation.
-   These are not independently published LGA totals. */
-const DATA2024={
- "Banjul":{population:25608,area:10.34,density:2476.2},
- "Basse":{population:286540,area:2031.69,density:141.0},
- "Brikama":{population:1182993,area:1769.46,density:668.6},
- "Janjanbureh":{population:160397,area:1475.55,density:108.7},
- "Kanifing":{population:385143,area:55.01,density:7000.8},
- "Kerewan":{population:265786,area:2214.73,density:120.0},
- "Kuntaur":{population:126635,area:1496.47,density:84.6},
- "Mansakonko":{population:95701,area:1540.25,density:62.1}
-};
-
 const COLORS=[
  "#1769aa","#19a7ce","#18875b","#e58b28",
  "#c94c4c","#8054a6","#6e9f48","#526577"
 ];
+
+const PALETTES={
+ population:["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
+ density:["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+ households:["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"],
+ compounds:["#f2f0f7","#cbc9e2","#9e9ac8","#756bb1","#54278f"]
+};
+
+const LAYER_COLORS={
+ population:"#1769aa",
+ density:"#c62828",
+ households:"#18875b",
+ compounds:"#8054a6"
+};
 
 let allFeatures=[];
 let filteredFeatures=[];
@@ -527,14 +536,16 @@ let currentYear=2024;
 
 /* =========================================================
    2. UTILITIES
-====================================================== */
+========================================================= */
 
 const $=id=>document.getElementById(id);
 
 function number(value){
+ if(value===null||value===undefined||value==="")return null;
  const n=Number(value);
  return Number.isFinite(n)?n:null;
 }
+
 function fmt(value,digits=0){
  if(value===null||value===undefined||!Number.isFinite(Number(value)))return "—";
  return Number(value).toLocaleString("en-US",{
@@ -542,6 +553,7 @@ function fmt(value,digits=0){
   maximumFractionDigits:digits
  });
 }
+
 function clean(value){return String(value??"").trim();}
 function isEAYear(year){return year===2013||year===2024;}
 
@@ -554,10 +566,12 @@ function getProps(f){return f.properties||{};}
 function getLGA(f){return clean(getProps(f).lganame);}
 function getDistrict(f){return clean(getProps(f).distname);}
 function getWard(f){return clean(getProps(f).wardname);}
+
 function getEACode(f){
  const p=getProps(f);
  return clean(p.EA_code??p.feacode??p.eaname??"EA");
 }
+
 function getArea(f){return number(getProps(f).Area_sqkm);}
 
 function getPopulation(f,year){
@@ -566,26 +580,37 @@ function getPopulation(f,year){
  if(year===2013)return number(p.sum_POP);
  return null;
 }
+
 function getHouseholds(f,year){
  const p=getProps(f);
  if(year===2024)return number(p.enum_hhs);
  if(year===2013)return number(p.sum_HHS);
  return null;
 }
+
 function getCompounds(f,year){
  const p=getProps(f);
  if(year===2024)return number(p.comp_map);
  if(year===2013)return number(p.Point_Count);
  return null;
 }
+
 function getDensity(f,year){
- const pop=getPopulation(f,year),area=getArea(f);
+ const pop=getPopulation(f,year);
+ const area=getArea(f);
  return pop!==null&&area!==null&&area>0?pop/area:null;
+}
+
+function sum(items,key){
+ return items.reduce((total,item)=>{
+  const v=number(item[key]);
+  return total+(v===null?0:v);
+ },0);
 }
 
 /* =========================================================
    3. MAP INITIALISATION
-====================================================== */
+========================================================= */
 
 map=L.map("map",{preferCanvas:true}).setView([13.45,-15.5],8);
 
@@ -593,18 +618,28 @@ baseLayers.osm=L.tileLayer(
  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
  {maxZoom:19,attribution:"© OpenStreetMap"}
 );
+
 baseLayers.satellite=L.tileLayer(
  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
  {maxZoom:19,attribution:"Tiles © Esri"}
 );
+
 baseLayers.hybrid=L.layerGroup([
- L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19}),
- L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",{maxZoom:19})
+ L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19}
+ ),
+ L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+  {maxZoom:19}
+ )
 ]);
+
 baseLayers.terrain=L.tileLayer(
  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
  {maxZoom:17,attribution:"© OpenTopoMap"}
 );
+
 activeBase=baseLayers.osm;
 activeBase.addTo(map);
 
@@ -616,32 +651,41 @@ $("baseSelect").addEventListener("change",()=>{
 
 /* =========================================================
    4. CRS CONVERSION
-   Uploaded GeoJSON: EPSG:3857
-   Leaflet display: EPSG:4326
-====================================================== */
+   Source file: EPSG:3857
+   Map display: EPSG:4326
+========================================================= */
 
 function convertCoords(coords){
  if(!Array.isArray(coords))return coords;
+
  if(typeof coords[0]==="number"){
   if(coords.length>=2){
-   const ll=proj4("EPSG:3857","EPSG:4326",[coords[0],coords[1]]);
+   const ll=proj4(
+    "EPSG:3857",
+    "EPSG:4326",
+    [coords[0],coords[1]]
+   );
    return [ll[0],ll[1],...coords.slice(2)];
   }
   return coords;
  }
+
  return coords.map(convertCoords);
 }
+
 function prepareFeature(feature){
  const f=JSON.parse(JSON.stringify(feature));
+
  if(f.geometry&&f.geometry.coordinates){
   f.geometry.coordinates=convertCoords(f.geometry.coordinates);
  }
+
  return f;
 }
 
 /* =========================================================
    5. LOAD GEOJSON
-====================================================== */
+========================================================= */
 
 async function loadGeoJSON(data,filename){
  if(data.type!=="FeatureCollection"||!Array.isArray(data.features)){
@@ -652,14 +696,21 @@ async function loadGeoJSON(data,filename){
   .map(prepareFeature)
   .filter(f=>f.geometry&&f.properties);
 
- if(!allFeatures.length)throw new Error("No valid features found.");
+ if(!allFeatures.length){
+  throw new Error("No valid features found.");
+ }
 
  $("dataBadge").textContent=fmt(allFeatures.length)+" EAs";
- setStatus("Loaded "+fmt(allFeatures.length)+" features from "+filename+".","success");
+
+ setStatus(
+  "Loaded "+fmt(allFeatures.length)+" features from "+filename+".",
+  "success"
+ );
 
  populateLGA();
  populateDistrict();
  populateWard();
+
  runAnalysis();
 }
 
@@ -667,16 +718,21 @@ async function autoLoad(){
  try{
   const response=await fetch("./Census_2024_2013.json");
   if(!response.ok)throw new Error("File not found");
+
   const data=await response.json();
   await loadGeoJSON(data,"Census_2024_2013.json");
+
  }catch(error){
-  setStatus("Automatic loading was unsuccessful. Select Census_2024_2013.json using the file picker. Use a local web server if loading from your computer.");
+  setStatus(
+   "Automatic loading was unsuccessful. Select Census_2024_2013.json using the file picker. A local web server may be required."
+  );
  }
 }
 
 $("geoFile").addEventListener("change",async e=>{
  const file=e.target.files[0];
  if(!file)return;
+
  try{
   const data=JSON.parse(await file.text());
   await loadGeoJSON(data,file.name);
@@ -688,71 +744,109 @@ $("geoFile").addEventListener("change",async e=>{
 
 /* =========================================================
    6. FILTERS
-====================================================== */
+========================================================= */
 
 function fillSelect(id,values,label){
  const select=$(id);
  const previous=select.value;
+
  select.innerHTML="";
+
  const first=document.createElement("option");
- first.value="ALL";first.textContent=label;
+ first.value="ALL";
+ first.textContent=label;
  select.appendChild(first);
 
- [...new Set(values.filter(v=>v))].sort((a,b)=>a.localeCompare(b)).forEach(v=>{
-  const option=document.createElement("option");
-  option.value=v;option.textContent=v;
-  select.appendChild(option);
- });
+ [...new Set(values.filter(v=>v))]
+  .sort((a,b)=>a.localeCompare(b))
+  .forEach(v=>{
+   const option=document.createElement("option");
+   option.value=v;
+   option.textContent=v;
+   select.appendChild(option);
+  });
 
- if([...select.options].some(o=>o.value===previous))select.value=previous;
+ if([...select.options].some(o=>o.value===previous)){
+  select.value=previous;
+ }
 }
 
 function populateLGA(){
  fillSelect("lgaSelect",allFeatures.map(getLGA),"All LGAs");
 }
+
 function populateDistrict(){
  const lga=$("lgaSelect").value;
- const features=allFeatures.filter(f=>lga==="ALL"||getLGA(f)===lga);
- fillSelect("districtSelect",features.map(getDistrict),"All districts");
+
+ const features=allFeatures.filter(f=>
+  lga==="ALL"||getLGA(f)===lga
+ );
+
+ fillSelect(
+  "districtSelect",
+  features.map(getDistrict),
+  "All districts"
+ );
 }
+
 function populateWard(){
  const lga=$("lgaSelect").value;
  const district=$("districtSelect").value;
+
  const features=allFeatures.filter(f=>
   (lga==="ALL"||getLGA(f)===lga)&&
   (district==="ALL"||getDistrict(f)===district)
  );
- fillSelect("wardSelect",features.map(getWard),"All wards");
+
+ fillSelect(
+  "wardSelect",
+  features.map(getWard),
+  "All wards"
+ );
 }
 
 $("lgaSelect").addEventListener("change",()=>{
- populateDistrict();populateWard();runAnalysis();
+ populateDistrict();
+ populateWard();
+ runAnalysis();
 });
+
 $("districtSelect").addEventListener("change",()=>{
- populateWard();runAnalysis();
+ populateWard();
+ runAnalysis();
 });
+
 $("wardSelect").addEventListener("change",runAnalysis);
 $("yearSelect").addEventListener("change",runAnalysis);
 $("mapIndicator").addEventListener("change",runAnalysis);
 
-["layerPopulation","layerDensity","layerHouseholds","layerCompounds"].forEach(id=>{
+[
+ "layerPopulation","layerDensity",
+ "layerHouseholds","layerCompounds"
+].forEach(id=>{
  $(id).addEventListener("change",runAnalysis);
 });
 
 /* =========================================================
-   7. FILTERED FEATURES AND EA STATISTICS
-====================================================== */
+   7. FILTERED FEATURES
+========================================================= */
 
 function getFilteredFeatures(){
  const lga=$("lgaSelect").value;
  const district=$("districtSelect").value;
  const ward=$("wardSelect").value;
+ const year=Number($("yearSelect").value);
 
- return allFeatures.filter(f=>
-  (lga==="ALL"||getLGA(f)===lga)&&
-  (district==="ALL"||getDistrict(f)===district)&&
-  (ward==="ALL"||getWard(f)===ward)
- );
+ return allFeatures.filter(f=>{
+  const lgaMatch=lga==="ALL"||getLGA(f)===lga;
+
+  // Historical years are only available at LGA level.
+  if(!isEAYear(year))return lgaMatch;
+
+  return lgaMatch&&
+   (district==="ALL"||getDistrict(f)===district)&&
+   (ward==="ALL"||getWard(f)===ward);
+ });
 }
 
 function buildEAStats(features,year){
@@ -770,16 +864,9 @@ function buildEAStats(features,year){
  }));
 }
 
-function sum(items,key){
- return items.reduce((total,item)=>{
-  const v=number(item[key]);
-  return total+(v===null?0:v);
- },0);
-}
-
 /* =========================================================
-   8. LGA AGGREGATION
-====================================================== */
+   8. LGA AGGREGATION FOR EA YEARS
+========================================================= */
 
 function aggregateEAByLGA(features,year){
  const groups={};
@@ -787,13 +874,20 @@ function aggregateEAByLGA(features,year){
  features.forEach(f=>{
   const lga=getLGA(f);
   if(!lga)return;
+
   if(!groups[lga]){
    groups[lga]={
-    name:lga,population:0,households:0,
-    compounds:0,area:0,count:0
+    name:lga,
+    population:0,
+    households:0,
+    compounds:0,
+    area:0,
+    count:0
    };
   }
+
   const g=groups[lga];
+
   g.population+=getPopulation(f,year)||0;
   g.households+=getHouseholds(f,year)||0;
   g.compounds+=getCompounds(f,year)||0;
@@ -808,60 +902,45 @@ function aggregateEAByLGA(features,year){
 }
 
 /* =========================================================
-   9. MAP COLOUR SCALES
-====================================================== */
+   9. HISTORICAL LGA VALUES
+========================================================= */
 
-const LAYER_COLORS={
- population:"#1769aa",
- density:"#c62828",
- households:"#18875b",
- compounds:"#8054a6"
-};
+function getHistoricalLGAValue(lga,year,metric){
+ const index=YEARS.indexOf(year);
 
-function getFeatureMetric(feature,year,metric){
- if(metric==="population")return getPopulation(feature,year);
- if(metric==="density")return getDensity(feature,year);
- if(metric==="households")return getHouseholds(feature,year);
- if(metric==="compounds")return getCompounds(feature,year);
+ if(index<0||index>3)return null;
+
+ if(metric==="population"){
+  return HIST[lga]?.pop[index]??null;
+ }
+
+ if(metric==="density"){
+  return HIST[lga]?.density[index]??null;
+ }
+
  return null;
 }
 
-function getMetricValues(features,year,metric){
- return features.map(f=>getFeatureMetric(f,year,metric))
-  .filter(v=>v!==null&&Number.isFinite(v));
+function getLGAStatsForSelectedYear(year,features){
+ if(year<=2003){
+  return LGA_NAMES
+   .filter(lga=>$("lgaSelect").value==="ALL"||$("lgaSelect").value===lga)
+   .map(lga=>({
+    name:lga,
+    population:getHistoricalLGAValue(lga,year,"population"),
+    density:getHistoricalLGAValue(lga,year,"density"),
+    area:HIST[lga]?.area??null,
+    households:null,
+    compounds:null
+   }));
+ }
+
+ return aggregateEAByLGA(features,year);
 }
 
-function quantileBreaks(values){
- const sorted=[...values].sort((a,b)=>a-b);
- if(!sorted.length)return [0,0,0,0,0];
- const at=p=>sorted[Math.min(sorted.length-1,Math.floor((sorted.length-1)*p))];
- return [at(0),at(.25),at(.5),at(.75),at(1)];
-}
-
-function metricColor(value,breaks,metric){
- if(value===null||!Number.isFinite(value))return "#b8c2cc";
- const palette={
-  population:["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
-  density:["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
-  households:["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"],
-  compounds:["#f2f0f7","#cbc9e2","#9e9ac8","#756bb1","#54278f"]
- }[metric];
-
- let index=0;
- if(value>breaks[1])index=1;
- if(value>breaks[2])index=2;
- if(value>breaks[3])index=3;
- return palette[index];
-}
-
-function getSelectedLayers(){
- const selected=[];
- if($("layerPopulation").checked)selected.push("population");
- if($("layerDensity").checked)selected.push("density");
- if($("layerHouseholds").checked)selected.push("households");
- if($("layerCompounds").checked)selected.push("compounds");
- return selected;
-}
+/* =========================================================
+   10. MAP METRICS
+========================================================= */
 
 function metricLabel(metric){
  return {
@@ -872,80 +951,180 @@ function metricLabel(metric){
  }[metric]||metric;
 }
 
+function getFeatureMetric(feature,year,metric){
+ if(year<=2003){
+  return getHistoricalLGAValue(getLGA(feature),year,metric);
+ }
+
+ if(metric==="population")return getPopulation(feature,year);
+ if(metric==="density")return getDensity(feature,year);
+ if(metric==="households")return getHouseholds(feature,year);
+ if(metric==="compounds")return getCompounds(feature,year);
+
+ return null;
+}
+
+function getMetricValues(features,year,metric){
+ return features
+  .map(f=>getFeatureMetric(f,year,metric))
+  .filter(v=>v!==null&&Number.isFinite(v));
+}
+
 /* =========================================================
-   10. MAP LEGEND
-   Displays all selected thematic layers.
-====================================================== */
+   11. FIVE-CLASS QUANTILE CLASSIFICATION
+========================================================= */
+
+function quantileBreaks(values){
+ const sorted=values
+  .filter(v=>Number.isFinite(v))
+  .sort((a,b)=>a-b);
+
+ if(!sorted.length)return null;
+
+ const at=p=>{
+  const index=Math.floor((sorted.length-1)*p);
+  return sorted[index];
+ };
+
+ return [
+  sorted[0],
+  at(.20),
+  at(.40),
+  at(.60),
+  at(.80),
+  sorted[sorted.length-1]
+ ];
+}
+
+function getClassIndex(value,breaks){
+ if(value===null||!Number.isFinite(value)||!breaks)return -1;
+
+ if(value<=breaks[1])return 0;
+ if(value<=breaks[2])return 1;
+ if(value<=breaks[3])return 2;
+ if(value<=breaks[4])return 3;
+
+ return 4;
+}
+
+function metricColor(value,breaks,metric){
+ const index=getClassIndex(value,breaks);
+
+ if(index<0)return "#b8c2cc";
+
+ return PALETTES[metric][index];
+}
+
+function getSelectedLayers(){
+ const selected=[];
+
+ if($("layerPopulation").checked)selected.push("population");
+ if($("layerDensity").checked)selected.push("density");
+ if($("layerHouseholds").checked)selected.push("households");
+ if($("layerCompounds").checked)selected.push("compounds");
+
+ return selected;
+}
+
+/* =========================================================
+   12. LEGEND
+========================================================= */
 
 function updateLegend(features,year){
  const selected=getSelectedLayers();
  const primary=$("mapIndicator").value;
 
- let html="<b>Map legend</b><br>";
- html+=`<div style="font-size:9px;color:#6b7c8f;margin-bottom:5px">Primary fill: ${metricLabel(primary)}</div>`;
-
  const all=[primary,...selected.filter(x=>x!==primary)];
  const unique=[...new Set(all)];
+
+ let html="<b>MAP LEGEND</b>";
+
+ html+=`
+  <div style="font-size:9px;color:#6b7c8f;margin-bottom:5px">
+   ${year<=2003?"Historical LGA classification":"Enumeration Area classification"}
+  </div>
+ `;
 
  unique.forEach(metric=>{
   const values=getMetricValues(features,year,metric);
   const breaks=quantileBreaks(values);
-  const palette={
-   population:["#eff3ff","#bdd7e7","#6baed6","#3182bd","#08519c"],
-   density:["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
-   households:["#edf8e9","#bae4b3","#74c476","#31a354","#006d2c"],
-   compounds:["#f2f0f7","#cbc9e2","#9e9ac8","#756bb1","#54278f"]
-  }[metric];
+  const palette=PALETTES[metric];
 
-  html+=`<div style="margin-top:7px;font-weight:700;color:${LAYER_COLORS[metric]}">${metricLabel(metric)}${metric===primary?" • Primary":""}</div>`;
+  html+=`
+   <div class="legend-heading" style="color:${LAYER_COLORS[metric]}">
+    ${metricLabel(metric)} ${metric===primary?"• Primary fill":"• Outline"}
+   </div>
+  `;
+
+  if(!values.length||!breaks){
+   html+=`
+    <div style="color:#9b4a3a;font-size:9px">
+     No data available for this year and indicator.
+    </div>
+   `;
+   return;
+  }
+
+  const digits=metric==="density"?1:0;
+
+  const labels=[
+   "≤ "+fmt(breaks[1],digits),
+   fmt(breaks[1],digits)+" – "+fmt(breaks[2],digits),
+   fmt(breaks[2],digits)+" – "+fmt(breaks[3],digits),
+   fmt(breaks[3],digits)+" – "+fmt(breaks[4],digits),
+   "> "+fmt(breaks[4],digits)
+  ];
+
   for(let i=0;i<5;i++){
-   let label;
-   if(values.length){
-    if(i===0)label="≤ "+fmt(breaks[1],metric==="density"?1:0);
-    else if(i===4)label="> "+fmt(breaks[3],metric==="density"?1:0);
-    else label=fmt(breaks[i],metric==="density"?1:0)+" – "+fmt(breaks[i+1],metric==="density"?1:0);
-   }else{
-    label="No data";
-   }
-   html+=`<div class="legend-row"><span class="swatch" style="background:${palette[i]}"></span>${label}</div>`;
+   html+=`
+    <div class="legend-row">
+     <span class="swatch" style="background:${palette[i]}"></span>
+     <span>${labels[i]}</span>
+    </div>
+   `;
   }
  });
 
- if(!selected.length){
-  html+="<div style='margin-top:6px;color:#9b4a3a'>No additional layers selected.</div>";
- }
  $("mapLegend").innerHTML=html;
 }
 
 /* =========================================================
-   11. MAP POPUPS AND DRAWING
-====================================================== */
+   13. MAP POPUP
+========================================================= */
 
 function popupHTML(feature,year){
- const p=feature.properties||{};
- const pop=getPopulation(feature,year);
+ const pop=getFeatureMetric(feature,year,"population");
+ const density=getFeatureMetric(feature,year,"density");
  const area=getArea(feature);
- const density=getDensity(feature,year);
- const households=getHouseholds(feature,year);
- const compounds=getCompounds(feature,year);
+ const households=getFeatureMetric(feature,year,"households");
+ const compounds=getFeatureMetric(feature,year,"compounds");
 
  return `
- <b>Enumeration Area</b><hr>
- <b>EA code:</b> ${getEACode(feature)}<br>
- <b>LGA:</b> ${getLGA(feature)}<br>
- <b>District:</b> ${getDistrict(feature)}<br>
- <b>Ward:</b> ${getWard(feature)}<br>
- <b>Year:</b> ${year}<br>
- <b>Population:</b> ${pop===null?"Not available":fmt(pop)}<br>
- <b>Area:</b> ${area===null?"Not available":fmt(area,3)+" km²"}<br>
- <b>Density:</b> ${density===null?"Not available":fmt(density,2)+" persons/km²"}<br>
- <b>Households:</b> ${households===null?"Not available":fmt(households)}<br>
- <b>Compounds:</b> ${compounds===null?"Not available":fmt(compounds)}
+  <b>${year<=2003?"Historical LGA statistics":"Enumeration Area statistics"}</b>
+  <hr>
+  <b>EA code:</b> ${getEACode(feature)}<br>
+  <b>LGA:</b> ${getLGA(feature)}<br>
+  <b>District:</b> ${year<=2003?"Not available":getDistrict(feature)}<br>
+  <b>Ward:</b> ${year<=2003?"Not available":getWard(feature)}<br>
+  <b>Year:</b> ${year}<br>
+  <b>Population:</b> ${pop===null?"Not available":fmt(pop)}<br>
+  <b>Area:</b> ${area===null?"Not available":fmt(area,3)+" km²"}<br>
+  <b>Density:</b> ${density===null?"Not available":fmt(density,2)+" persons/km²"}<br>
+  <b>Households:</b> ${households===null?"Not available":fmt(households)}<br>
+  <b>Compounds:</b> ${compounds===null?"Not available":fmt(compounds)}
  `;
 }
 
+/* =========================================================
+   14. DRAW MAP
+========================================================= */
+
 function drawMap(features,year){
- if(geoLayer){map.removeLayer(geoLayer);geoLayer=null;}
+ if(geoLayer){
+  map.removeLayer(geoLayer);
+  geoLayer=null;
+ }
+
  outlineLayers.forEach(layer=>map.removeLayer(layer));
  outlineLayers=[];
 
@@ -956,160 +1135,160 @@ function drawMap(features,year){
  }
 
  const primary=$("mapIndicator").value;
- const values=getMetricValues(features,year,primary);
- const breaks=quantileBreaks(values);
+ const primaryValues=getMetricValues(features,year,primary);
+ const primaryBreaks=quantileBreaks(primaryValues);
 
  geoLayer=L.geoJSON(features,{
   style:feature=>{
    const value=getFeatureMetric(feature,year,primary);
+
    return {
-    color:"#45596c",
-    weight:.45,
-    opacity:.8,
-    fillColor:metricColor(value,breaks,primary),
-    fillOpacity:.75
+    color:"#ffffff",
+    weight:.55,
+    opacity:1,
+    fillColor:metricColor(value,primaryBreaks,primary),
+    fillOpacity:value===null?.12:.78
    };
   },
+
   onEachFeature:(feature,layer)=>{
    layer.bindPopup(popupHTML(feature,year));
   }
+
  }).addTo(map);
 
- // Additional thematic layers are drawn as coloured outlines.
- // This keeps their presence visible without replacing the primary fill.
+ // Additional selected indicators are drawn as outlines.
  const additional=getSelectedLayers().filter(x=>x!==primary);
 
  additional.forEach(metric=>{
-  const metricValues=getMetricValues(features,year,metric);
-  const metricBreaks=quantileBreaks(metricValues);
+  const values=getMetricValues(features,year,metric);
+  const breaks=quantileBreaks(values);
+
+  if(!values.length)return;
 
   const outline=L.geoJSON(features,{
    interactive:false,
+
    style:feature=>{
     const value=getFeatureMetric(feature,year,metric);
-    const fill=metricColor(value,metricBreaks,metric);
+    const color=metricColor(value,breaks,metric);
+
     return {
-     color:fill,
-     weight:1.25,
-     opacity:.85,
+     color:color,
+     weight:1.15,
+     opacity:.95,
      fillOpacity:0
     };
    }
   }).addTo(map);
+
   outlineLayers.push(outline);
  });
 
  const bounds=geoLayer.getBounds();
- if(bounds.isValid())map.fitBounds(bounds,{padding:[12,12],maxZoom:11});
+
+ if(bounds.isValid()){
+  map.fitBounds(bounds,{padding:[12,12],maxZoom:11});
+ }
 
  $("featureCount").textContent=fmt(features.length)+" EA features";
- $("mapLevel").textContent=isEAYear(year)?"EA level":"LGA historical view";
- $("mapYearChip").textContent=year+" • "+(isEAYear(year)?"EA level":"LGA level");
+
+ $("mapLevel").textContent=
+  year<=2003?"LGA historical view":"EA level";
+
+ $("mapYearChip").textContent=
+  year+" • "+(year<=2003?"LGA statistics":"EA statistics");
+
  updateLegend(features,year);
 }
 
 /* =========================================================
-   12. KPI UPDATES
-====================================================== */
+   15. KPI UPDATES
+========================================================= */
 
-function updateKPIs(stats,year){
- const population=sum(stats,"population");
- const households=sum(stats,"households");
- const compounds=sum(stats,"compounds");
- const area=sum(stats,"area");
- const density=area>0?population/area:null;
+function updateKPIs(year,features){
+ if(year<=2003){
+  const lgaStats=getLGAStatsForSelectedYear(year,features);
 
- $("kPopulation").textContent=fmt(population);
- $("kDensity").textContent=fmt(density,1);
- $("kHouseholds").textContent=fmt(households);
- $("kCompounds").textContent=fmt(compounds);
- $("kArea").textContent=fmt(area,2);
- $("kEAs").textContent=fmt(stats.length);
+  const population=sum(lgaStats,"population");
+  const area=sum(lgaStats,"area");
 
- $("levelBadge").textContent=isEAYear(year)?"EA level":"LGA level";
-}
+  $("kPopulation").textContent=fmt(population);
+  $("kDensity").textContent=fmt(area>0?population/area:null,1);
 
-/* =========================================================
-   13. CHART DATA HELPERS
-====================================================== */
+  $("kHouseholds").textContent="—";
+  $("kCompounds").textContent="—";
+  $("kArea").textContent=fmt(area,2);
+  $("kEAs").textContent="—";
 
-function getPopulationForLGA(lga,year){
- if(year===2024)return DATA2024[lga]?.population??null;
- const index=YEARS.indexOf(year);
- if(index<0||index>4)return null;
- return HIST[lga]?.pop[index]??null;
-}
+ }else{
+  const stats=buildEAStats(features,year);
 
-function getDensityForLGA(lga,year){
- if(year===2024)return DATA2024[lga]?.density??null;
- const index=YEARS.indexOf(year);
- if(index<0||index>4)return null;
- return HIST[lga]?.density[index]??null;
-}
+  const population=sum(stats,"population");
+  const households=sum(stats,"households");
+  const compounds=sum(stats,"compounds");
+  const area=sum(stats,"area");
+  const density=area>0?population/area:null;
 
-function getAreaForLGA(lga,year){
- if(year===2024)return DATA2024[lga]?.area??null;
- return HIST[lga]?.area??null;
-}
-
-function annualGrowth(lga,yearIndex){
- if(yearIndex===0)return null;
- const prev=getPopulationForLGA(lga,YEARS[yearIndex-1]);
- const current=getPopulationForLGA(lga,YEARS[yearIndex]);
- const years=YEARS[yearIndex]-YEARS[yearIndex-1];
- if(!prev||!current||prev<=0)return null;
- return (Math.pow(current/prev,1/years)-1)*100;
-}
-
-function getLGAStatsForSelectedYear(year){
- if(year===2024)return LGA_NAMES.map(lga=>({
-  name:lga,
-  population:DATA2024[lga].population,
-  area:DATA2024[lga].area,
-  density:DATA2024[lga].density
- }));
-
- if(isEAYear(year)){
-  const grouped=aggregateEAByLGA(filteredFeatures,year);
-  return grouped.map(g=>({
-   name:g.name,population:g.population,
-   area:g.area,density:g.density
-  }));
+  $("kPopulation").textContent=fmt(population);
+  $("kDensity").textContent=fmt(density,1);
+  $("kHouseholds").textContent=fmt(households);
+  $("kCompounds").textContent=fmt(compounds);
+  $("kArea").textContent=fmt(area,2);
+  $("kEAs").textContent=fmt(stats.length);
  }
 
- return LGA_NAMES.map(lga=>({
-  name:lga,
-  population:getPopulationForLGA(lga,year),
-  area:getAreaForLGA(lga,year),
-  density:getDensityForLGA(lga,year)
- }));
+ $("levelBadge").textContent=
+  year<=2003?"LGA level":"EA level";
 }
 
 /* =========================================================
-   14. CHART RENDERING
-====================================================== */
+   16. CHART DATA
+========================================================= */
 
-function chartOptions(title,percent=false){
- return {
-  responsive:true,
-  maintainAspectRatio:false,
-  animation:false,
-  plugins:{
-   legend:{display:false},
-   title:{display:false},
-   tooltip:{callbacks:{
-    label:ctx=>ctx.dataset.label+": "+fmt(ctx.raw,percent?2:1)+(percent?"%":"")
-   }}
-  },
-  scales:{
-   x:{ticks:{font:{size:9},maxRotation:45,minRotation:0}},
-   y:{
-    beginAtZero:true,
-    ticks:{font:{size:9},callback:value=>fmt(value,0)}
-   }
-  }
- };
+function getPopulationForLGA(lga,year,features){
+ if(year<=2003){
+  return getHistoricalLGAValue(lga,year,"population");
+ }
+
+ const stats=aggregateEAByLGA(features,year);
+ const match=stats.find(s=>s.name===lga);
+
+ return match?match.population:null;
 }
+
+function getDensityForLGA(lga,year,features){
+ if(year<=2003){
+  return getHistoricalLGAValue(lga,year,"density");
+ }
+
+ const stats=aggregateEAByLGA(features,year);
+ const match=stats.find(s=>s.name===lga);
+
+ return match?match.density:null;
+}
+
+function annualGrowth(lga,yearIndex,features){
+ if(yearIndex===0)return null;
+
+ const previousYear=YEARS[yearIndex-1];
+ const currentYear=YEARS[yearIndex];
+
+ const previous=getPopulationForLGA(lga,previousYear,features);
+ const current=getPopulationForLGA(lga,currentYear,features);
+
+ const interval=currentYear-previousYear;
+
+ if(previous===null||current===null||previous<=0||current<=0){
+  return null;
+ }
+
+ return (Math.pow(current/previous,1/interval)-1)*100;
+}
+
+/* =========================================================
+   17. CHART RENDERING
+========================================================= */
 
 function renderChart(id,type,labels,datasets,title,percent=false){
  if(charts[id]){
@@ -1117,54 +1296,108 @@ function renderChart(id,type,labels,datasets,title,percent=false){
   delete charts[id];
  }
 
- const isCircular=["pie","doughnut","polarArea"].includes(type);
- const dataSets=datasets.map((ds,index)=>({
+ const circular=["pie","doughnut","polarArea"].includes(type);
+
+ const chartDatasets=datasets.map((ds,index)=>({
   ...ds,
-  backgroundColor:isCircular?COLORS:COLORS[index%COLORS.length],
-  borderColor:COLORS[index%COLORS.length],
-  borderWidth:2,
+  backgroundColor:circular
+   ?labels.map((_,i)=>COLORS[i%COLORS.length])
+   :COLORS[index%COLORS.length],
+  borderColor:circular
+   ?"#ffffff"
+   :COLORS[index%COLORS.length],
+  borderWidth:circular?1:2,
   tension:.25,
   pointRadius:2,
   spanGaps:true
  }));
 
- const options=chartOptions(title,percent);
- if(isCircular){
-  options.scales=undefined;
-  options.plugins.legend={display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}};
+ const options={
+  responsive:true,
+  maintainAspectRatio:false,
+  animation:false,
+  plugins:{
+   legend:{
+    display:circular||datasets.length>1,
+    position:"bottom",
+    labels:{font:{size:9},boxWidth:10}
+   },
+   tooltip:{
+    callbacks:{
+     label:ctx=>{
+      const value=fmt(ctx.raw,percent?2:1);
+      return (ctx.dataset.label||"Value")+": "+value+(percent?"%":"");
+     }
+    }
+   }
+  }
+ };
+
+ if(!circular){
+  options.scales={
+   x:{ticks:{font:{size:9},maxRotation:45,minRotation:0}},
+   y:{
+    beginAtZero:true,
+    ticks:{
+     font:{size:9},
+     callback:value=>fmt(value,0)
+    }
+   }
+  };
  }
 
  charts[id]=new Chart($(id),{
-  type,
-  data:{labels,datasets:dataSets},
-  options
+  type:type,
+  data:{
+   labels:labels,
+   datasets:chartDatasets
+  },
+  options:options
  });
 }
 
 /* =========================================================
-   15. FIVE ANALYTICS CHARTS
-====================================================== */
+   18. FIVE ANALYTICS CHARTS
+========================================================= */
 
 function updateAllCharts(){
- const type=$("chartType").value;
  const selectedYear=Number($("yearSelect").value);
+ const type=$("chartType").value;
 
- // 1. Historical population trend: 1973–2024
+ // Historical population trend.
+ // 2013 and 2024 values are aggregated from EA records.
  const trendDatasets=LGA_NAMES.map((lga,i)=>({
   label:lga,
-  data:YEARS.map(y=>getPopulationForLGA(lga,y)),
+  data:YEARS.map(year=>
+   getPopulationForLGA(lga,year,allFeatures)
+  ),
   borderColor:COLORS[i],
-  backgroundColor:COLORS[i]
+  backgroundColor:COLORS[i],
+  fill:false
  }));
+
  renderChart(
-  "trendChart","line",YEARS.map(String),trendDatasets,
+  "trendChart",
+  "line",
+  YEARS.map(String),
+  trendDatasets,
   "Historical population trend"
  );
 
- // 2. Population comparison for selected year
- const lgaStats=getLGAStatsForSelectedYear(selectedYear);
+ // LGA comparison for selected year.
+ const lgaStats=getLGAStatsForSelectedYear(
+  selectedYear,
+  filteredFeatures
+ );
+
+ const comparisonType=
+  ["pie","doughnut","polarArea"].includes(type)
+   ?type
+   :type;
+
  renderChart(
-  "comparisonChart",type,
+  "comparisonChart",
+  comparisonType,
   lgaStats.map(s=>s.name),
   [{
    label:"Population",
@@ -1173,67 +1406,67 @@ function updateAllCharts(){
   "Population comparison"
  );
 
- // 3. Population share by LGA
- const total=lgaStats.reduce((s,x)=>s+(x.population||0),0);
- const shares=lgaStats.map(s=>total>0?(s.population/total)*100:0);
+ // Population share.
+ const total=lgaStats.reduce(
+  (s,x)=>s+(x.population||0),0
+ );
+
+ const shares=lgaStats.map(s=>
+  total>0?(s.population/total)*100:0
+ );
+
  renderChart(
-  "shareChart",["pie","doughnut","polarArea"].includes(type)?type:"doughnut",
+  "shareChart",
+  ["pie","doughnut","polarArea"].includes(type)?type:"doughnut",
   lgaStats.map(s=>s.name),
-  [{label:"Population share",data:shares}],
-  "Population share",true
+  [{
+   label:"Population share",
+   data:shares
+  }],
+  "Population share",
+  true
  );
 
- // 4. Annualised growth rate by LGA for selected year
+ // Annual growth rate.
  const yearIndex=YEARS.indexOf(selectedYear);
+
  const growthValues=LGA_NAMES.map(lga=>
-  yearIndex>0?annualGrowth(lga,yearIndex):null
- );
- renderChart(
-  "growthChart",type==="line"?"line":"bar",
-  LGA_NAMES,
-  [{label:"Annual growth rate (%)",data:growthValues}],
-  "Annual growth rate",true
+  yearIndex>0
+   ?annualGrowth(lga,yearIndex,allFeatures)
+   :null
  );
 
- // 5. Population density by LGA
  renderChart(
-  "densityChart",type==="line"?"line":"bar",
+  "growthChart",
+  type==="line"?"line":"bar",
+  LGA_NAMES,
+  [{
+   label:"Annual growth rate (%)",
+   data:growthValues
+  }],
+  "Annual growth rate",
+  true
+ );
+
+ // Population density.
+ renderChart(
+  "densityChart",
+  type==="line"?"line":"bar",
   lgaStats.map(s=>s.name),
   [{
    label:"Population density (persons/km²)",
    data:lgaStats.map(s=>s.density)
   }],
-  "Population density by LGA"
+  "Population density"
  );
 }
 
 /* =========================================================
-   16. LGA STATISTICS TABLE
-====================================================== */
+   19. LGA STATISTICS TABLE
+========================================================= */
 
-function updateTable(year){
- let rows;
-
- if(year===2024){
-  rows=LGA_NAMES.map(lga=>({
-   name:lga,
-   population:DATA2024[lga].population,
-   density:DATA2024[lga].density,
-   area:DATA2024[lga].area
-  }));
- }else if(year===2013){
-  rows=aggregateEAByLGA(filteredFeatures,2013).map(g=>({
-   name:g.name,population:g.population,
-   density:g.density,area:g.area
-  }));
- }else{
-  rows=LGA_NAMES.map(lga=>({
-   name:lga,
-   population:getPopulationForLGA(lga,year),
-   density:getDensityForLGA(lga,year),
-   area:getAreaForLGA(lga,year)
-  }));
- }
+function updateTable(year,features){
+ const rows=getLGAStatsForSelectedYear(year,features);
 
  $("summaryTable").innerHTML=rows.map(r=>`
   <tr>
@@ -1243,169 +1476,229 @@ function updateTable(year){
    <td>${fmt(r.area,2)}</td>
   </tr>
  `).join("");
+
+ if(!rows.length){
+  $("summaryTable").innerHTML=
+   '<tr><td colspan="4">No records available for this selection.</td></tr>';
+ }
 }
 
 /* =========================================================
-   17. METHODOLOGY TEXT
-====================================================== */
+   20. INTERPRETATION
+========================================================= */
 
-function updateInterpretation(year,stats){
+function updateInterpretation(year,features){
  const lga=$("lgaSelect").value;
  const district=$("districtSelect").value;
  const ward=$("wardSelect").value;
  const primary=$("mapIndicator").value;
 
- let text="";
+ let message="";
 
- if(year===2024){
-  text=
-   "2024 EA analysis: Population is aggregated from enum_pop, households from enum_hhs and compounds from comp_map. Population density is calculated as aggregated enum_pop divided by the sum of Area_sqkm for the selected EA features. All eight LGAs are included in the aggregation where records exist. EA boundaries are displayed from the uploaded GeoJSON. The uploaded geometry is identified as EPSG:3857 and converted to EPSG:4326 for Leaflet display. The 2023 and 2024 LGA figures shown in this dashboard are sums of EA-level records in the selected GeoJSON. They should not be assumed to be identical to separately published LGA summary totals.";
+ if(year<=2003){
+  message=
+   year+" historical analysis uses LGA-level population totals and historical LGA density values. The map colours the EA polygons according to their parent LGA's historical value. Therefore, the same LGA has the same historical colour across its EA polygons. The polygons are geographical reference boundaries; they are not historical EA observations. District and ward filters are not applied to these historical LGA statistics.";
  }else if(year===2013){
-  text=
-   "2013 EA analysis based on 2013 census mapping figures: Population is aggregated from sum_POP and households from sum_HHS. Compounds / mapped points are aggregated from Point_Count. Population density is calculated as aggregated sum_POP divided by the sum of Area_sqkm for the selected EA features. EA boundaries are displayed from the uploaded GeoJSON.";
+  message=
+   "2013 Census Mapping EA analysis uses sum_POP for population, sum_HHS for households, Point_Count for compounds and Area_sqkm for area. EA density is calculated as sum_POP divided by Area_sqkm. LGA charts and tables aggregate the selected EA records.";
  }else{
-  text=
-   year+" historical analysis: Population density is represented at LGA level using the embedded historical LGA population and area values. EA polygons are used as a geographical reference for the historical LGA-level map. The map does not represent observed EA-level population density for these earlier years.";
+  message=
+   "2024 EA analysis uses enum_pop for population, enum_hhs for households, comp_map for compounds and Area_sqkm for area. EA density is calculated as enum_pop divided by Area_sqkm. LGA charts and tables aggregate the selected EA records.";
  }
 
- text+=" Current primary map indicator: "+metricLabel(primary)+".";
- text+=" Selected filters: LGA = "+lga+", District = "+district+", Ward = "+ward+".";
- $("interpretation").textContent=text;
+ message+=" Primary map indicator: "+metricLabel(primary)+".";
+ message+=" Selected LGA: "+lga+".";
+ if(year===2013||year===2024){
+  message+=" District: "+district+". Ward: "+ward+".";
+ }
+
+ $("interpretation").textContent=message;
 }
 
 /* =========================================================
-   18. MAIN ANALYSIS
-====================================================== */
+   21. MAIN ANALYSIS
+========================================================= */
 
 function runAnalysis(){
  if(!allFeatures.length)return;
 
  currentYear=Number($("yearSelect").value);
+
  filteredFeatures=getFilteredFeatures();
 
- let stats;
  if(isEAYear(currentYear)){
-  stats=buildEAStats(filteredFeatures,currentYear);
+  currentStats=buildEAStats(filteredFeatures,currentYear);
  }else{
-  stats=LGA_NAMES.map(lga=>({
-   name:lga,
-   population:getPopulationForLGA(lga,currentYear),
-   area:getAreaForLGA(lga,currentYear),
-   density:getDensityForLGA(lga,currentYear),
-   households:null,compounds:null
-  }));
-  if($("lgaSelect").value!=="ALL"){
-   stats=stats.filter(s=>s.name===$("lgaSelect").value);
-  }
+  currentStats=getLGAStatsForSelectedYear(
+   currentYear,
+   filteredFeatures
+  );
  }
 
- currentStats=stats;
-
  drawMap(filteredFeatures,currentYear);
- updateKPIs(stats,currentYear);
- updateTable(currentYear);
+ updateKPIs(currentYear,filteredFeatures);
+ updateTable(currentYear,filteredFeatures);
  updateAllCharts();
- updateInterpretation(currentYear,stats);
-
- $("levelBadge").textContent=isEAYear(currentYear)?"EA level":"LGA level";
+ updateInterpretation(currentYear,filteredFeatures);
 }
 
 /* =========================================================
-   19. CSV EXPORT
-====================================================== */
+   22. CSV EXPORT
+========================================================= */
 
 function csvEscape(value){
  const s=value===null||value===undefined?"":String(value);
  return '"'+s.replace(/"/g,'""')+'"';
 }
+
 function downloadFile(content,filename,mime){
  const blob=new Blob([content],{type:mime});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
- a.href=url;a.download=filename;
- document.body.appendChild(a);a.click();a.remove();
- URL.revokeObjectURL(url);
+
+ a.href=url;
+ a.download=filename;
+
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 $("csvBtn").addEventListener("click",()=>{
- if(!currentStats.length)return alert("Load the GeoJSON and run an analysis first.");
+ if(!allFeatures.length){
+  alert("Load the GeoJSON and run an analysis first.");
+  return;
+ }
 
  const year=Number($("yearSelect").value);
  let headers,rows;
 
  if(isEAYear(year)){
   const stats=buildEAStats(filteredFeatures,year);
+
   headers=[
    "Year","EA_code","LGA","District","Ward",
-   "Population","Households","Compounds","Area_sqkm",
-   "Population_Density_people_per_sqkm"
+   "Population","Households","Compounds",
+   "Area_sqkm","Population_Density_people_per_sqkm"
   ];
+
   rows=stats.map(s=>[
    year,s.name,s.lga,s.district,s.ward,
-   s.population,s.households,s.compounds,s.area,s.density
+   s.population,s.households,s.compounds,
+   s.area,s.density
   ]);
+
  }else{
-  headers=["Year","LGA","Population","Area_sqkm","Population_Density_people_per_sqkm"];
-  rows=currentStats.map(s=>[
-   year,s.name,s.population,s.area,s.density
+  const stats=getLGAStatsForSelectedYear(
+   year,
+   filteredFeatures
+  );
+
+  headers=[
+   "Year","LGA","Population",
+   "Population_Density_people_per_sqkm",
+   "Area_sqkm"
+  ];
+
+  rows=stats.map(s=>[
+   year,s.name,s.population,s.density,s.area
   ]);
  }
 
- const csv=[headers,...rows].map(row=>row.map(csvEscape).join(",")).join("\n");
- downloadFile(csv,"GBoS_Population_Analytics_"+year+".csv","text/csv;charset=utf-8;");
+ const csv=[headers,...rows]
+  .map(row=>row.map(csvEscape).join(","))
+  .join("\n");
+
+ downloadFile(
+  csv,
+  "GBoS_Population_Analytics_"+year+".csv",
+  "text/csv;charset=utf-8;"
+ );
 });
 
 /* =========================================================
-   20. GEOJSON EXPORT
-====================================================== */
+   23. GEOJSON EXPORT
+========================================================= */
 
 $("geoBtn").addEventListener("click",()=>{
- if(!filteredFeatures.length)return alert("Load the GeoJSON first.");
+ if(!filteredFeatures.length){
+  alert("Load the GeoJSON first.");
+  return;
+ }
 
  const year=Number($("yearSelect").value);
+
  const output={
   type:"FeatureCollection",
   name:"GBoS_Population_Analytics_"+year,
-  crs:{type:"name",properties:{name:"EPSG:4326"}},
+  crs:{
+   type:"name",
+   properties:{name:"EPSG:4326"}
+  },
   features:filteredFeatures.map(f=>{
    const out=JSON.parse(JSON.stringify(f));
+
    out.properties.analysis_year=year;
-   out.properties.analysis_population=getPopulation(f,year);
-   out.properties.analysis_area_sqkm=getArea(f);
-   out.properties.analysis_density=getDensity(f,year);
-   out.properties.analysis_households=getHouseholds(f,year);
-   out.properties.analysis_compounds=getCompounds(f,year);
+   out.properties.analysis_level=year<=2003?"LGA":"EA";
+
+   out.properties.analysis_population=
+    getFeatureMetric(f,year,"population");
+
+   out.properties.analysis_density=
+    getFeatureMetric(f,year,"density");
+
+   out.properties.analysis_area_sqkm=
+    getArea(f);
+
+   out.properties.analysis_households=
+    getFeatureMetric(f,year,"households");
+
+   out.properties.analysis_compounds=
+    getFeatureMetric(f,year,"compounds");
+
    return out;
   })
  };
- downloadFile(JSON.stringify(output,null,2),
+
+ downloadFile(
+  JSON.stringify(output,null,2),
   "GBoS_Population_Analytics_"+year+".geojson",
-  "application/geo+json");
+  "application/geo+json"
+ );
 });
 
 /* =========================================================
-   21. EVENT LISTENERS
-====================================================== */
+   24. EVENT LISTENERS
+========================================================= */
 
 $("runBtn").addEventListener("click",runAnalysis);
+
 $("chartType").addEventListener("change",updateAllCharts);
 
 $("resetBtn").addEventListener("click",()=>{
  $("yearSelect").value="2024";
  $("lgaSelect").value="ALL";
+
  populateDistrict();
  populateWard();
+
  $("districtSelect").value="ALL";
  $("wardSelect").value="ALL";
+
  $("mapIndicator").value="population";
+
  $("layerPopulation").checked=true;
  $("layerDensity").checked=true;
  $("layerHouseholds").checked=false;
  $("layerCompounds").checked=false;
+
  $("chartType").value="bar";
  $("baseSelect").value="osm";
 
  if(activeBase)map.removeLayer(activeBase);
+
  activeBase=baseLayers.osm;
  activeBase.addTo(map);
 
@@ -1413,11 +1706,13 @@ $("resetBtn").addEventListener("click",()=>{
 });
 
 /* =========================================================
-   22. INITIAL STATE
-====================================================== */
+   25. INITIALISE
+========================================================= */
 
 autoLoad();
+
 </script>
 </body>
 </html>
+
 
