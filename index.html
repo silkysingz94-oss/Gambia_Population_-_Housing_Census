@@ -1,0 +1,2380 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SILKYSINGZ GEOAI | AGRICULTURAL HEALTH & YIELD INTELLIGENCE</title>
+
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+:root {
+    --navy:#12334d;
+    --green:#176b55;
+    --green2:#23866b;
+    --gold:#d6a842;
+    --bg:#f2f6f5;
+    --border:#dce5e2;
+    --text:#263746;
+    --muted:#71818a;
+    --white:#fff;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+html,body {
+    width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden;
+}
+
+body {
+    display:flex;
+    flex-direction:column;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+    flex:0 0 auto;
+    background:linear-gradient(115deg,#102f46,#176b55);
+    color:white;
+    padding:11px 20px;
+    z-index:10;
+}
+
+.header-inner {
+    width:100%;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.brand {
+    color:#bce6d1;
+    font-size:10px;
+    letter-spacing:2px;
+    font-weight:bold;
+}
+
+header h1 {
+    margin:5px 0;
+    font-size:22px;
+}
+
+header p {
+    margin:0;
+    color:#dcece7;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.header-tag {
+    border:1px solid #ffffff55;
+    padding:9px 12px;
+    border-radius:5px;
+    font-size:10px;
+    white-space:nowrap;
+}
+
+/* =====================================================
+   THREE EQUAL COLUMN WORKSPACE
+===================================================== */
+
+main.container {
+    flex:1 1 auto;
+    width:100%;
+    min-height:0;
+    min-width:0;
+    padding:10px;
+
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+
+    overflow:hidden;
+}
+
+.ui-column {
+    min-width:0;
+    min-height:0;
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    padding:2px 6px 15px 2px;
+
+    scrollbar-width:thin;
+    scrollbar-color:#9aada5 #edf2ef;
+}
+
+.ui-column::-webkit-scrollbar {
+    width:7px;
+}
+
+.ui-column::-webkit-scrollbar-track {
+    background:#edf2ef;
+    border-radius:10px;
+}
+
+.ui-column::-webkit-scrollbar-thumb {
+    background:#9aada5;
+    border-radius:10px;
+}
+
+/* =====================================================
+   CENTRE MAP COLUMN
+===================================================== */
+
+.map-column {
+    min-width:0;
+    min-height:0;
+    height:100%;
+    overflow:hidden;
+}
+
+.map-panel {
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+/* =====================================================
+   GENERAL COMPONENTS
+===================================================== */
+
+.notice {
+    padding:12px;
+    background:#fff7e5;
+    border-left:5px solid var(--gold);
+    border-radius:5px;
+    font-size:11px;
+    line-height:1.7;
+}
+
+.section-title {
+    color:var(--navy);
+    font-size:15px;
+    margin:0 0 12px;
+}
+
+.filters,.panel,.credits {
+    background:white;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:13px;
+    min-width:0;
+    flex:0 0 auto;
+    box-shadow:0 2px 7px #00000005;
+}
+
+.panel h2 {
+    color:var(--navy);
+    font-size:14px;
+    margin:0 0 6px;
+}
+
+.panel-desc {
+    font-size:10px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:0 0 12px;
+}
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filter-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+}
+
+.filter-group label {
+    display:block;
+    font-size:10px;
+    font-weight:bold;
+    color:#5b707b;
+    margin-bottom:6px;
+}
+
+select,input {
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:9px;
+    background:white;
+    color:var(--text);
+    font-size:11px;
+    outline:none;
+    min-width:0;
+}
+
+select:focus,input:focus {
+    border-color:var(--green);
+}
+
+.filter-actions {
+    display:flex;
+    gap:6px;
+    margin-top:12px;
+    flex-wrap:wrap;
+}
+
+button {
+    border:0;
+    border-radius:5px;
+    padding:9px 11px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:10px;
+}
+
+.btn-primary {
+    background:var(--green);
+    color:white;
+}
+
+.btn-dark {
+    background:var(--navy);
+    color:white;
+}
+
+.btn-light {
+    background:#e9f0ed;
+    color:var(--navy);
+}
+
+button:hover {
+    opacity:.88;
+}
+
+.status {
+    font-size:10px;
+    color:var(--muted);
+    margin-top:9px;
+    line-height:1.5;
+}
+
+/* =====================================================
+   KPI CARDS
+===================================================== */
+
+.kpi-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+}
+
+.kpi {
+    background:white;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px;
+    min-height:90px;
+    box-shadow:0 2px 7px #00000006;
+}
+
+.kpi-label {
+    color:var(--muted);
+    font-size:9px;
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+.kpi-value {
+    font-size:21px;
+    color:var(--navy);
+    font-weight:bold;
+}
+
+.kpi-sub {
+    font-size:9px;
+    color:var(--muted);
+    margin-top:5px;
+}
+
+/* =====================================================
+   CHARTS
+===================================================== */
+
+.chart-box {
+    position:relative;
+    height:220px;
+    width:100%;
+}
+
+.chart-box.small {
+    height:195px;
+}
+
+/* =====================================================
+   MAP
+===================================================== */
+
+#map {
+    width:100%;
+    flex:1 1 auto;
+    min-height:200px;
+    border-radius:6px;
+    z-index:1;
+}
+
+.map-legend {
+    display:flex;
+    flex-wrap:wrap;
+    gap:11px;
+    margin-top:10px;
+    font-size:10px;
+    color:#52636c;
+    flex:0 0 auto;
+}
+
+.legend-item {
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.legend-dot {
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    display:inline-block;
+    border:1px solid white;
+    box-shadow:0 0 0 1px #999;
+}
+
+.map-note {
+    font-size:9px;
+    color:var(--muted);
+    margin-top:8px;
+    line-height:1.5;
+    flex:0 0 auto;
+}
+
+/* =====================================================
+   TABLES
+===================================================== */
+
+.tabs {
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+}
+
+.tab {
+    background:#e9f0ed;
+    color:var(--navy);
+}
+
+.tab.active {
+    background:var(--green);
+    color:white;
+}
+
+.table-toolbar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.table-toolbar input {
+    flex:1;
+    min-width:100px;
+}
+
+.table-wrap {
+    width:100%;
+    overflow:auto;
+    max-height:350px;
+    border:1px solid var(--border);
+    border-radius:5px;
+}
+
+table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:10px;
+    white-space:nowrap;
+}
+
+th {
+    background:#174a5b;
+    color:white;
+    padding:10px;
+    text-align:left;
+    position:sticky;
+    top:0;
+    z-index:2;
+}
+
+td {
+    padding:9px;
+    border-bottom:1px solid #edf0ef;
+}
+
+tbody tr:hover {
+    background:#f0f7f4;
+}
+
+.badge {
+    padding:4px 7px;
+    border-radius:15px;
+    background:#e3f3e9;
+    color:#176b55;
+    font-weight:bold;
+    font-size:9px;
+}
+
+.badge.moderate {
+    background:#fff1d6;
+    color:#91630c;
+}
+
+.badge.poor {
+    background:#fbe5e5;
+    color:#a32c2c;
+}
+
+/* =====================================================
+   LEGENDS AND METHODOLOGY
+===================================================== */
+
+.legend-condition {
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:10px;
+    font-size:10px;
+}
+
+.condition-key {
+    display:flex;
+    gap:5px;
+    align-items:center;
+}
+
+.key-box {
+    width:9px;
+    height:9px;
+    border-radius:2px;
+}
+
+.method-grid {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+}
+
+.method-item {
+    background:#f5f8f7;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:11px;
+}
+
+.method-item strong {
+    display:block;
+    font-size:11px;
+    color:var(--green);
+    margin-bottom:5px;
+}
+
+.method-item p {
+    font-size:10px;
+    color:#667780;
+    line-height:1.6;
+    margin:0;
+}
+
+.credits {
+    background:#eaf2ef;
+    border:1px solid #d5e3dd;
+    line-height:1.8;
+    font-size:10px;
+    color:#52656b;
+}
+
+.credits strong {
+    color:var(--navy);
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+    flex:0 0 auto;
+    background:#102f46;
+    color:white;
+    text-align:center;
+    padding:7px 10px;
+    font-size:9px;
+    line-height:1.6;
+}
+
+footer strong {
+    color:#bce6d1;
+}
+
+/* =====================================================
+   RESPONSIVE MOBILE LAYOUT
+===================================================== */
+
+@media(max-width:750px) {
+
+    html,body {
+        height:auto;
+        min-height:100%;
+        overflow:auto;
+    }
+
+    header {
+        padding:14px;
+    }
+
+    .header-inner {
+        display:block;
+    }
+
+    header h1 {
+        font-size:20px;
+    }
+
+    .header-tag {
+        display:inline-block;
+        margin-top:10px;
+    }
+
+    main.container {
+        display:flex;
+        flex-direction:column;
+        height:auto;
+        min-height:0;
+        overflow:visible;
+        padding:9px;
+    }
+
+    .ui-column {
+        height:auto;
+        overflow:visible;
+    }
+
+    .map-column {
+        height:550px;
+        flex:none;
+    }
+
+    .map-panel {
+        height:550px;
+    }
+
+    .kpi-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .filter-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    footer {
+        padding:12px;
+    }
+}
+
+@media(max-width:400px) {
+    .filter-grid {
+        grid-template-columns:1fr;
+    }
+
+    .filter-actions button {
+        flex:1;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+<div class="header-inner">
+    <div>
+        <div class="brand">SILKYSINGZ GEOAI • RESEARCH & DEVELOPMENT</div>
+        <h1>AGRICULTURAL HEALTH & YIELD INTELLIGENCE</h1>
+        <p>The Gambia | Geospatial agricultural monitoring, field observations,
+        crop-cut measurements and climate intelligence.</p>
+    </div>
+
+    <div class="header-tag">
+        THE GAMBIA • NATIONAL DEMONSTRATION
+    </div>
+</div>
+</header>
+
+
+<!-- =====================================================
+     MAIN THREE-COLUMN WORKSPACE
+===================================================== -->
+
+<main class="container">
+
+
+<!-- =====================================================
+     LEFT COLUMN
+     FILTERS, KPIs AND AGRICULTURAL CHARTS
+===================================================== -->
+
+<div class="ui-column left-column">
+
+    <div class="notice">
+        <strong>DATA DISCLAIMER:</strong>
+        This dashboard contains synthetic demonstration observations
+        and illustrative coordinates. The records are not official
+        GBoS statistics, verified crop yields, actual EA identifiers
+        or measured weather-station data. Replace them with
+        quality-controlled observations before official analysis.
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <section class="filters">
+
+        <h2 class="section-title">
+            Administrative and Dataset Filters
+        </h2>
+
+        <div class="filter-grid">
+
+            <div class="filter-group">
+                <label for="regionFilter">Region / LGA</label>
+                <select id="regionFilter">
+                    <option value="All">All regions</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="districtFilter">District</label>
+                <select id="districtFilter">
+                    <option value="All">All districts</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="cropFilter">Crop type</label>
+                <select id="cropFilter">
+                    <option value="All">All crops</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="systemFilter">Production system</label>
+                <select id="systemFilter">
+                    <option value="All">All systems</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-primary" onclick="applyFilters()">
+                Apply filters
+            </button>
+
+            <button class="btn-light" onclick="resetFilters()">
+                Reset
+            </button>
+
+            <button class="btn-dark" onclick="downloadCurrentCSV()">
+                Export CSV ↓
+            </button>
+        </div>
+
+        <div class="status" id="filterStatus">
+            Showing all demonstration records.
+        </div>
+
+    </section>
+
+
+    <!-- KPI CARDS -->
+
+    <section class="kpi-grid">
+
+        <div class="kpi">
+            <div class="kpi-label">FIELD OBSERVATIONS</div>
+            <div class="kpi-value" id="kpiFields">0</div>
+            <div class="kpi-sub">Filtered sample records</div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-label">CROP TYPES</div>
+            <div class="kpi-value" id="kpiCrops">0</div>
+            <div class="kpi-sub">Distinct crop categories</div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-label">AVERAGE YIELD</div>
+            <div class="kpi-value" id="kpiYield">0</div>
+            <div class="kpi-sub">kg/ha • illustrative sample</div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-label">AVERAGE FIELD NDVI</div>
+            <div class="kpi-value" id="kpiNDVI">0</div>
+            <div class="kpi-sub">Unitless sample indicator</div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-label">GOOD CROP CONDITION</div>
+            <div class="kpi-value" id="kpiGood">0%</div>
+            <div class="kpi-sub">Share of filtered observations</div>
+        </div>
+
+    </section>
+
+
+    <!-- YIELD CHART -->
+
+    <section class="panel">
+
+        <h2>Average Yield by Crop Type</h2>
+
+        <p class="panel-desc">
+            Comparison of illustrative crop yield observations in kg/ha.
+        </p>
+
+        <div class="chart-box">
+            <canvas id="yieldChart"></canvas>
+        </div>
+
+    </section>
+
+
+    <!-- REGIONAL CHART -->
+
+    <section class="panel">
+
+        <h2>Observations by Region</h2>
+
+        <p class="panel-desc">
+            Number of field records in each region.
+        </p>
+
+        <div class="chart-box small">
+            <canvas id="regionChart"></canvas>
+        </div>
+
+    </section>
+
+
+    <!-- CONDITION CHART -->
+
+    <section class="panel">
+
+        <h2>Crop Condition Distribution</h2>
+
+        <p class="panel-desc">
+            Distribution of field-assessed crop conditions.
+        </p>
+
+        <div class="chart-box small">
+            <canvas id="conditionChart"></canvas>
+        </div>
+
+        <div class="legend-condition">
+
+            <div class="condition-key">
+                <span class="key-box" style="background:#238b45"></span>
+                Good
+            </div>
+
+            <div class="condition-key">
+                <span class="key-box" style="background:#e0a526"></span>
+                Moderate
+            </div>
+
+            <div class="condition-key">
+                <span class="key-box" style="background:#c83d3d"></span>
+                Poor
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SOIL MOISTURE CHART -->
+
+    <section class="panel">
+
+        <h2>Soil Moisture by Crop</h2>
+
+        <p class="panel-desc">
+            Average illustrative field soil moisture (%).
+        </p>
+
+        <div class="chart-box small">
+            <canvas id="moistureChart"></canvas>
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =====================================================
+     CENTRE COLUMN
+     FIXED INTERACTIVE MAP
+===================================================== -->
+
+<div class="map-column">
+
+    <section class="panel map-panel">
+
+        <h2>Geospatial Distribution of Field Observations</h2>
+
+        <p class="panel-desc">
+            Illustrative field observation locations. Markers respond
+            to selected region, district and crop filters.
+        </p>
+
+        <div id="map"></div>
+
+        <div class="map-legend">
+
+            <div class="legend-item">
+                <span class="legend-dot"
+                      style="background:#238b45"></span>
+                Good condition
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-dot"
+                      style="background:#e0a526"></span>
+                Moderate condition
+            </div>
+
+            <div class="legend-item">
+                <span class="legend-dot"
+                      style="background:#c83d3d"></span>
+                Poor condition
+            </div>
+
+        </div>
+
+        <div class="map-note">
+            Coordinates are synthetic and are not suitable for
+            operational navigation or official spatial reporting.
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =====================================================
+     RIGHT COLUMN
+     WEATHER, TABLES, METHODOLOGY AND CREDITS
+===================================================== -->
+
+<div class="ui-column right-column">
+
+
+    <!-- RAINFALL CHART -->
+
+    <section class="panel">
+
+        <h2>Rainfall by Weather Station</h2>
+
+        <p class="panel-desc">
+            Illustrative rainfall observations in millimetres.
+        </p>
+
+        <div class="chart-box">
+            <canvas id="rainChart"></canvas>
+        </div>
+
+    </section>
+
+
+    <!-- CLIMATE CHART -->
+
+    <section class="panel">
+
+        <h2>Temperature and Relative Humidity</h2>
+
+        <p class="panel-desc">
+            Illustrative weather station measurements.
+        </p>
+
+        <div class="chart-box">
+            <canvas id="climateChart"></canvas>
+        </div>
+
+    </section>
+
+
+    <!-- DATA TABLES -->
+
+    <section class="panel">
+
+        <h2>Sample Agricultural Datasets</h2>
+
+        <p class="panel-desc">
+            Browse and export demonstration records. Regional filters
+            apply to the field observation, crop-cut and weather datasets.
+        </p>
+
+        <div class="tabs">
+
+            <button class="tab active"
+                    onclick="switchTab('field',this)">
+                Field Observations
+            </button>
+
+            <button class="tab"
+                    onclick="switchTab('crop',this)">
+                Crop-Cut Samples
+            </button>
+
+            <button class="tab"
+                    onclick="switchTab('weather',this)">
+                Weather Stations
+            </button>
+
+            <button class="tab"
+                    onclick="switchTab('dictionary',this)">
+                Data Dictionary
+            </button>
+
+        </div>
+
+        <div class="table-toolbar">
+
+            <input type="search"
+                   id="tableSearch"
+                   placeholder="Search current table..."
+                   oninput="renderTable()">
+
+            <button class="btn-dark"
+                    onclick="downloadCurrentCSV()">
+                Download CSV ↓
+            </button>
+
+        </div>
+
+        <div class="table-wrap" id="tableContainer"></div>
+
+        <div class="status" id="tableStatus"></div>
+
+    </section>
+
+
+    <!-- METHODOLOGY -->
+
+    <section class="panel">
+
+        <h2>Methodology and Analytical Workflow</h2>
+
+        <p class="panel-desc">
+            Proposed integration of field data, Earth observation
+            and climate information for agricultural monitoring.
+        </p>
+
+        <div class="method-grid">
+
+            <div class="method-item">
+                <strong>01 • Field Data</strong>
+                <p>
+                    Crop type, planting date, harvested area,
+                    crop-cut measurements, observed crop condition
+                    and GPS locations.
+                </p>
+            </div>
+
+            <div class="method-item">
+                <strong>02 • Satellite Observations</strong>
+                <p>
+                    Sentinel-2 vegetation indices including NDVI,
+                    EVI and NDMI; Sentinel-1 radar information
+                    for moisture and crop structure screening.
+                </p>
+            </div>
+
+            <div class="method-item">
+                <strong>03 • Climate Variables</strong>
+                <p>
+                    Rainfall, temperature, humidity and soil
+                    moisture indicators from verified station
+                    or gridded climate sources.
+                </p>
+            </div>
+
+            <div class="method-item">
+                <strong>04 • Agricultural Indicators</strong>
+                <p>
+                    Vegetation condition, rainfall anomaly,
+                    moisture status and relative crop-health screening.
+                </p>
+            </div>
+
+            <div class="method-item">
+                <strong>05 • Yield Modelling</strong>
+                <p>
+                    Train and validate crop-specific models using
+                    measured crop-cut yield observations and
+                    independent validation samples.
+                </p>
+            </div>
+
+            <div class="method-item">
+                <strong>06 • Statistical Reporting</strong>
+                <p>
+                    Summarise results by region, district, crop type
+                    and relevant administrative or survey geography.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STATISTICAL NOTES -->
+
+    <section class="panel">
+
+        <h2>Statistical Interpretation and Data Quality</h2>
+
+        <div style="font-size:11px;line-height:1.9;color:#5c6d74">
+
+            <p>
+                <strong>Yield:</strong>
+                The average yield shown is calculated from the sample
+                records currently displayed. It is not a regional
+                or national crop-yield estimate.
+            </p>
+
+            <p>
+                <strong>NDVI:</strong>
+                NDVI is a vegetation greenness indicator.
+                It should not be interpreted as a direct measurement
+                of crop yield.
+            </p>
+
+            <p>
+                <strong>Crop condition:</strong>
+                Good, Moderate and Poor are illustrative
+                field-assessment categories.
+            </p>
+
+            <p>
+                <strong>Weather:</strong>
+                The rainfall and climate charts use demonstration
+                observations, not official GMet station data.
+            </p>
+
+            <p>
+                <strong>Model validation:</strong>
+                A supervised yield model should be evaluated using
+                independent validation data and appropriate metrics
+                such as RMSE, MAE and R².
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROJECT CREDITS -->
+
+    <section class="credits">
+
+        <strong>PROJECT:</strong>
+        SILKYSINGZ GEOAI • Agricultural Health & Yield Intelligence<br>
+
+        <strong>PRODUCED BY:</strong>
+        Ansu Singhateh<br>
+
+        <strong>POSITION:</strong>
+        GIS Analyst | GIS-Cartography Unit<br>
+
+        <strong>INSTITUTION:</strong>
+        Gambia Bureau of Statistics (GBoS)<br>
+
+        <strong>TECHNOLOGIES:</strong>
+        HTML5, CSS3, JavaScript, Chart.js, Leaflet,
+        Google Earth Engine (planned analytical integration).<br>
+
+        <strong>DATA STATUS:</strong>
+        Synthetic demonstration data • Research and educational use.
+
+    </section>
+
+</div>
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+    <strong>GBoS GEOAI</strong> |
+    Gambia Bureau of Statistics • GIS-Cartography Unit |
+    Produced by Ansu Singhateh |
+    Research, education and geospatial innovation
+</footer>
+
+
+<script>
+
+// ============================================================
+// 1. SYNTHETIC FIELD OBSERVATIONS
+// ============================================================
+
+const fieldData = [
+
+{
+sample_id:"SYN-001",ea_code:"TEST-EA-001",
+region_name:"West Coast",district_name:"Kombo South",
+ward_name:"Brikama",crop_type:"Groundnut",
+planting_date:"2026-06-15",harvest_date:"2026-10-20",
+latitude:13.2700,longitude:-16.6500,
+plot_area_ha:1.00,yield_kg_ha:1420,
+production_system:"Rainfed",
+soil_moisture_pct:24,field_ndvi:0.68,
+observed_crop_condition:"Good",
+survey_date:"2026-10-22",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+},
+
+{
+sample_id:"SYN-002",ea_code:"TEST-EA-002",
+region_name:"North Bank",district_name:"Lower Niumi",
+ward_name:"Kerewan",crop_type:"Millet",
+planting_date:"2026-06-20",harvest_date:"2026-10-28",
+latitude:13.4900,longitude:-16.0900,
+plot_area_ha:0.80,yield_kg_ha:980,
+production_system:"Rainfed",
+soil_moisture_pct:18,field_ndvi:0.54,
+observed_crop_condition:"Moderate",
+survey_date:"2026-10-30",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+},
+
+{
+sample_id:"SYN-003",ea_code:"TEST-EA-003",
+region_name:"Central River",district_name:"Niamina East",
+ward_name:"Sapu",crop_type:"Maize",
+planting_date:"2026-06-10",harvest_date:"2026-10-15",
+latitude:13.5500,longitude:-14.9200,
+plot_area_ha:0.50,yield_kg_ha:2350,
+production_system:"Rainfed",
+soil_moisture_pct:27,field_ndvi:0.73,
+observed_crop_condition:"Good",
+survey_date:"2026-10-18",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+},
+
+{
+sample_id:"SYN-004",ea_code:"TEST-EA-004",
+region_name:"Upper River",district_name:"Kantora",
+ward_name:"Basse",crop_type:"Rice",
+planting_date:"2026-07-01",harvest_date:"2026-11-05",
+latitude:13.3100,longitude:-14.2200,
+plot_area_ha:0.40,yield_kg_ha:3100,
+production_system:"Lowland / rainfed",
+soil_moisture_pct:31,field_ndvi:0.61,
+observed_crop_condition:"Moderate",
+survey_date:"2026-11-07",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+},
+
+{
+sample_id:"SYN-005",ea_code:"TEST-EA-005",
+region_name:"Lower River",district_name:"Jarra West",
+ward_name:"Soma",crop_type:"Early millet",
+planting_date:"2026-06-25",harvest_date:"2026-10-25",
+latitude:13.4300,longitude:-15.5400,
+plot_area_ha:0.70,yield_kg_ha:760,
+production_system:"Rainfed",
+soil_moisture_pct:16,field_ndvi:0.42,
+observed_crop_condition:"Poor",
+survey_date:"2026-10-27",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+},
+
+{
+sample_id:"SYN-006",ea_code:"TEST-EA-006",
+region_name:"Banjul",district_name:"Banjul",
+ward_name:"Banjul",crop_type:"Vegetables",
+planting_date:"2026-07-10",harvest_date:"2026-10-10",
+latitude:13.4550,longitude:-16.5790,
+plot_area_ha:0.15,yield_kg_ha:5200,
+production_system:"Irrigated",
+soil_moisture_pct:35,field_ndvi:0.81,
+observed_crop_condition:"Good",
+survey_date:"2026-10-12",
+data_source:"Synthetic demonstration",
+validation_status:"Not validated"
+}
+
+];
+
+
+// ============================================================
+// 2. CROP-CUT DATA
+// ============================================================
+
+const cropData = [
+
+{
+cropcut_id:"CC-001",ea_code:"TEST-EA-001",
+crop_type:"Groundnut",harvest_date:"2026-10-20",
+sample_plot_area_m2:10,sample_grain_weight_kg:1.42,
+estimated_yield_kg_ha:1420,field_area_ha:1.00,
+data_source:"Synthetic demonstration"
+},
+
+{
+cropcut_id:"CC-002",ea_code:"TEST-EA-002",
+crop_type:"Millet",harvest_date:"2026-10-28",
+sample_plot_area_m2:10,sample_grain_weight_kg:0.98,
+estimated_yield_kg_ha:980,field_area_ha:0.80,
+data_source:"Synthetic demonstration"
+},
+
+{
+cropcut_id:"CC-003",ea_code:"TEST-EA-003",
+crop_type:"Maize",harvest_date:"2026-10-15",
+sample_plot_area_m2:10,sample_grain_weight_kg:2.35,
+estimated_yield_kg_ha:2350,field_area_ha:0.50,
+data_source:"Synthetic demonstration"
+},
+
+{
+cropcut_id:"CC-004",ea_code:"TEST-EA-004",
+crop_type:"Rice",harvest_date:"2026-11-05",
+sample_plot_area_m2:10,sample_grain_weight_kg:3.10,
+estimated_yield_kg_ha:3100,field_area_ha:0.40,
+data_source:"Synthetic demonstration"
+}
+
+];
+
+
+// ============================================================
+// 3. WEATHER STATION DATA
+// ============================================================
+
+const weatherData = [
+
+{
+record_id:"WX-001",station_id:"TEST-ST-001",
+station_name:"Brikama",latitude:13.2700,
+longitude:-16.6500,observation_date:"2026-08-15",
+daily_rainfall_mm:185,air_temperature_c:29.4,
+relative_humidity_pct:74,wind_speed_m_s:2.6,
+soil_moisture_m3_m3:0.24,
+data_source:"Synthetic demonstration",
+region_name:"West Coast"
+},
+
+{
+record_id:"WX-002",station_id:"TEST-ST-002",
+station_name:"Kerewan",latitude:13.4900,
+longitude:-16.0900,observation_date:"2026-08-15",
+daily_rainfall_mm:142,air_temperature_c:30.1,
+relative_humidity_pct:69,wind_speed_m_s:2.4,
+soil_moisture_m3_m3:0.18,
+data_source:"Synthetic demonstration",
+region_name:"North Bank"
+},
+
+{
+record_id:"WX-003",station_id:"TEST-ST-003",
+station_name:"Sapu",latitude:13.5500,
+longitude:-14.9200,observation_date:"2026-08-15",
+daily_rainfall_mm:210,air_temperature_c:28.7,
+relative_humidity_pct:82,wind_speed_m_s:2.7,
+soil_moisture_m3_m3:0.29,
+data_source:"Synthetic demonstration",
+region_name:"Central River"
+},
+
+{
+record_id:"WX-004",station_id:"TEST-ST-004",
+station_name:"Basse",latitude:13.3100,
+longitude:-14.2200,observation_date:"2026-08-15",
+daily_rainfall_mm:198,air_temperature_c:29.0,
+relative_humidity_pct:79,wind_speed_m_s:2.8,
+soil_moisture_m3_m3:0.31,
+data_source:"Synthetic demonstration",
+region_name:"Upper River"
+}
+
+];
+
+
+// ============================================================
+// 4. DATA DICTIONARY
+// ============================================================
+
+const dictionaryData = [
+
+{field_name:"ea_code",description:"Enumeration Area identifier",format:"Text",guidance:"Replace test EA codes with official GBoS EA codes."},
+
+{field_name:"region_name",description:"Region or LGA name",format:"Text",guidance:"Use the official GBoS administrative naming convention."},
+
+{field_name:"district_name",description:"District name",format:"Text",guidance:"Use official district names."},
+
+{field_name:"crop_type",description:"Crop grown in sampled plot",format:"Text",guidance:"Use a consistent crop classification."},
+
+{field_name:"planting_date",description:"Planting date",format:"YYYY-MM-DD",guidance:"Use ISO date format."},
+
+{field_name:"harvest_date",description:"Harvest date",format:"YYYY-MM-DD",guidance:"Use ISO date format."},
+
+{field_name:"latitude",description:"WGS84 latitude",format:"Decimal degrees",guidance:"GPS latitude, EPSG:4326."},
+
+{field_name:"longitude",description:"WGS84 longitude",format:"Decimal degrees",guidance:"GPS longitude, EPSG:4326."},
+
+{field_name:"plot_area_ha",description:"Sampled field area",format:"Hectares",guidance:"Record measured area."},
+
+{field_name:"yield_kg_ha",description:"Observed crop yield",format:"kg/ha",guidance:"Use measured crop-cut or harvest data."},
+
+{field_name:"production_system",description:"Agricultural production system",format:"Text",guidance:"Rainfed, irrigated, lowland, etc."},
+
+{field_name:"soil_moisture_pct",description:"Field soil moisture",format:"Percent",guidance:"Record instrument and measurement depth."},
+
+{field_name:"field_ndvi",description:"Field-linked NDVI",format:"Unitless",guidance:"Record satellite acquisition date and source."},
+
+{field_name:"daily_rainfall_mm",description:"Daily rainfall",format:"mm/day",guidance:"Record station or gridded source."},
+
+{field_name:"air_temperature_c",description:"Air temperature",format:"Degrees C",guidance:"Specify sensor height and source."},
+
+{field_name:"validation_status",description:"Quality-control status",format:"Text",guidance:"Pending, Checked or Validated."}
+
+];
+
+
+// ============================================================
+// 5. APPLICATION STATE
+// ============================================================
+
+let filteredField = [...fieldData];
+let filteredCrop = [...cropData];
+let filteredWeather = [...weatherData];
+
+let currentTab = "field";
+let charts = {};
+
+const regionFilter = document.getElementById("regionFilter");
+const districtFilter = document.getElementById("districtFilter");
+const cropFilter = document.getElementById("cropFilter");
+const systemFilter = document.getElementById("systemFilter");
+
+
+// ============================================================
+// 6. FILTER OPTION POPULATION
+// ============================================================
+
+function fillSelect(select,values,defaultLabel) {
+
+    select.innerHTML = "";
+
+    const allOption = document.createElement("option");
+
+    allOption.value = "All";
+    allOption.textContent = defaultLabel;
+
+    select.appendChild(allOption);
+
+    [...new Set(values)].sort().forEach(value => {
+
+        const option = document.createElement("option");
+
+        option.value = value;
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+fillSelect(
+    regionFilter,
+    fieldData.map(d => d.region_name),
+    "All regions"
+);
+
+
+function updateDistrictOptions() {
+
+    const region = regionFilter.value;
+
+    const rows = region === "All"
+        ? fieldData
+        : fieldData.filter(d => d.region_name === region);
+
+    fillSelect(
+        districtFilter,
+        rows.map(d => d.district_name),
+        "All districts"
+    );
+
+}
+
+
+function updateCropOptions() {
+
+    const region = regionFilter.value;
+    const district = districtFilter.value;
+
+    let rows = fieldData;
+
+    if (region !== "All") {
+        rows = rows.filter(d => d.region_name === region);
+    }
+
+    if (district !== "All") {
+        rows = rows.filter(d => d.district_name === district);
+    }
+
+    fillSelect(
+        cropFilter,
+        rows.map(d => d.crop_type),
+        "All crops"
+    );
+
+}
+
+
+fillSelect(
+    systemFilter,
+    fieldData.map(d => d.production_system),
+    "All systems"
+);
+
+regionFilter.addEventListener("change",() => {
+
+    updateDistrictOptions();
+    updateCropOptions();
+
+});
+
+districtFilter.addEventListener("change",updateCropOptions);
+
+
+// ============================================================
+// 7. FILTER APPLICATION
+// ============================================================
+
+function applyFilters() {
+
+    const region = regionFilter.value;
+    const district = districtFilter.value;
+    const crop = cropFilter.value;
+    const system = systemFilter.value;
+
+    filteredField = fieldData.filter(d => {
+
+        return (
+
+            (region === "All" || d.region_name === region) &&
+
+            (district === "All" || d.district_name === district) &&
+
+            (crop === "All" || d.crop_type === crop) &&
+
+            (system === "All" || d.production_system === system)
+
+        );
+
+    });
+
+    const eaCodes = new Set(
+        filteredField.map(d => d.ea_code)
+    );
+
+    filteredCrop = cropData.filter(d =>
+        eaCodes.has(d.ea_code)
+    );
+
+    filteredWeather = weatherData.filter(d =>
+        region === "All" || d.region_name === region
+    );
+
+    updateDashboard();
+
+    document.getElementById("filterStatus").textContent =
+
+        "Showing " + filteredField.length +
+        " field records, " + filteredCrop.length +
+        " crop-cut records and " + filteredWeather.length +
+        " weather records.";
+
+}
+
+
+// ============================================================
+// 8. RESET FILTERS
+// ============================================================
+
+function resetFilters() {
+
+    regionFilter.value = "All";
+
+    updateDistrictOptions();
+
+    districtFilter.value = "All";
+
+    updateCropOptions();
+
+    cropFilter.value = "All";
+    systemFilter.value = "All";
+
+    applyFilters();
+
+}
+
+
+// ============================================================
+// 9. STATISTICAL FUNCTIONS
+// ============================================================
+
+function average(values) {
+
+    if (!values.length) return 0;
+
+    return values.reduce((a,b) =>
+        a + Number(b),0
+    ) / values.length;
+
+}
+
+
+function uniqueCount(values) {
+    return new Set(values).size;
+}
+
+
+function formatNumber(value,digits=0) {
+
+    return Number(value).toLocaleString(
+        "en-US",
+        {
+            minimumFractionDigits:digits,
+            maximumFractionDigits:digits
+        }
+    );
+
+}
+
+
+// ============================================================
+// 10. KPI UPDATE
+// ============================================================
+
+function updateKPIs() {
+
+    const n = filteredField.length;
+
+    const avgYield = average(
+        filteredField.map(d => d.yield_kg_ha)
+    );
+
+    const avgNDVI = average(
+        filteredField.map(d => d.field_ndvi)
+    );
+
+    const good = filteredField.filter(
+        d => d.observed_crop_condition === "Good"
+    ).length;
+
+    const goodPercent = n ? good / n * 100 : 0;
+
+    document.getElementById("kpiFields").textContent =
+        formatNumber(n);
+
+    document.getElementById("kpiCrops").textContent =
+        uniqueCount(filteredField.map(d => d.crop_type));
+
+    document.getElementById("kpiYield").textContent =
+        n ? formatNumber(avgYield) : "—";
+
+    document.getElementById("kpiNDVI").textContent =
+        n ? avgNDVI.toFixed(2) : "—";
+
+    document.getElementById("kpiGood").textContent =
+        n ? formatNumber(goodPercent,1) + "%" : "—";
+
+}
+
+
+// ============================================================
+// 11. CHART CREATION
+// ============================================================
+
+function makeChart(id,type,labels,datasets,options={}) {
+
+    if (charts[id]) {
+        charts[id].destroy();
+    }
+
+    const ctx = document.getElementById(id);
+
+    charts[id] = new Chart(ctx, {
+
+        type:type,
+
+        data:{
+            labels:labels,
+            datasets:datasets
+        },
+
+        options:{
+
+            responsive:true,
+            maintainAspectRatio:false,
+
+            plugins:{
+
+                legend:{
+                    display:type === "doughnut" || type === "pie",
+                    position:"bottom",
+                    labels:{
+                        font:{size:10}
+                    }
+                }
+
+            },
+
+            scales:type === "doughnut" || type === "pie"
+                ? {}
+                : {
+
+                    x:{
+                        ticks:{font:{size:9}},
+                        grid:{display:false}
+                    },
+
+                    y:{
+                        beginAtZero:true,
+                        ticks:{font:{size:9}},
+                        grid:{color:"#edf0ef"}
+                    }
+
+                },
+
+            ...options
+
+        }
+
+    });
+
+}
+
+
+// ============================================================
+// 12. UPDATE CHARTS
+// ============================================================
+
+function updateCharts() {
+
+    // Yield by crop
+
+    const crops = [...new Set(
+        filteredField.map(d => d.crop_type)
+    )];
+
+    const yieldValues = crops.map(crop => {
+
+        const rows = filteredField.filter(
+            d => d.crop_type === crop
+        );
+
+        return average(
+            rows.map(d => d.yield_kg_ha)
+        );
+
+    });
+
+    makeChart(
+        "yieldChart",
+        "bar",
+        crops,
+        [{
+            label:"Average yield (kg/ha)",
+            data:yieldValues,
+            backgroundColor:"#23866b",
+            borderRadius:4
+        }]
+    );
+
+
+    // Regional observations
+
+    const regionNames = [...new Set(
+        filteredField.map(d => d.region_name)
+    )];
+
+    const regionCounts = regionNames.map(region =>
+
+        filteredField.filter(
+            d => d.region_name === region
+        ).length
+
+    );
+
+    makeChart(
+        "regionChart",
+        "bar",
+        regionNames,
+        [{
+            label:"Observations",
+            data:regionCounts,
+            backgroundColor:"#315d7a",
+            borderRadius:4
+        }],
+        {
+            indexAxis:"y",
+
+            scales:{
+                x:{beginAtZero:true},
+                y:{ticks:{font:{size:9}}}
+            }
+        }
+    );
+
+
+    // Crop condition
+
+    const conditions = ["Good","Moderate","Poor"];
+
+    const conditionCounts = conditions.map(condition =>
+
+        filteredField.filter(
+            d => d.observed_crop_condition === condition
+        ).length
+
+    );
+
+    makeChart(
+        "conditionChart",
+        "doughnut",
+        conditions,
+        [{
+            data:conditionCounts,
+            backgroundColor:[
+                "#238b45",
+                "#e0a526",
+                "#c83d3d"
+            ],
+            borderWidth:2,
+            borderColor:"#ffffff"
+        }]
+    );
+
+
+    // Soil moisture by crop
+
+    const moistureValues = crops.map(crop => {
+
+        const rows = filteredField.filter(
+            d => d.crop_type === crop
+        );
+
+        return average(
+            rows.map(d => d.soil_moisture_pct)
+        );
+
+    });
+
+    makeChart(
+        "moistureChart",
+        "bar",
+        crops,
+        [{
+            label:"Soil moisture (%)",
+            data:moistureValues,
+            backgroundColor:"#4b91b3",
+            borderRadius:4
+        }]
+    );
+
+
+    // Rainfall
+
+    makeChart(
+        "rainChart",
+        "bar",
+        filteredWeather.map(d => d.station_name),
+        [{
+            label:"Rainfall (mm)",
+            data:filteredWeather.map(d => d.daily_rainfall_mm),
+            backgroundColor:"#367eae",
+            borderRadius:4
+        }]
+    );
+
+
+    // Temperature and humidity
+
+    makeChart(
+        "climateChart",
+        "bar",
+        filteredWeather.map(d => d.station_name),
+        [
+            {
+                label:"Temperature (°C)",
+                data:filteredWeather.map(d => d.air_temperature_c),
+                backgroundColor:"#d88c46"
+            },
+            {
+                label:"Relative humidity (%)",
+                data:filteredWeather.map(d => d.relative_humidity_pct),
+                backgroundColor:"#3a8b79"
+            }
+        ],
+        {
+            plugins:{
+                legend:{
+                    display:true,
+                    position:"bottom",
+                    labels:{font:{size:9}}
+                }
+            }
+        }
+    );
+
+}
+
+
+// ============================================================
+// 13. MAP INITIALISATION
+// ============================================================
+
+const map = L.map("map",{
+    zoomControl:true
+}).setView([13.45,-15.4],8);
+
+
+const osm = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom:19,
+        attribution:"© OpenStreetMap contributors"
+    }
+).addTo(map);
+
+
+const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+        maxZoom:19,
+        attribution:"Tiles © Esri"
+    }
+);
+
+
+const terrain = L.tileLayer(
+    "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom:17,
+        attribution:"© OpenTopoMap contributors"
+    }
+);
+
+
+L.control.layers(
+    {
+        "Street Map":osm,
+        "Satellite":satellite,
+        "Terrain":terrain
+    },
+    null,
+    {position:"topright"}
+).addTo(map);
+
+
+const markerLayer = L.layerGroup().addTo(map);
+
+
+// ============================================================
+// 14. MAP MARKER COLOURS
+// ============================================================
+
+function conditionColor(condition) {
+
+    if (condition === "Good") return "#238b45";
+
+    if (condition === "Moderate") return "#e0a526";
+
+    return "#c83d3d";
+
+}
+
+
+// ============================================================
+// 15. HTML ESCAPING
+// ============================================================
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+// ============================================================
+// 16. UPDATE MAP
+// ============================================================
+
+function updateMap() {
+
+    markerLayer.clearLayers();
+
+    filteredField.forEach(d => {
+
+        const marker = L.circleMarker(
+            [d.latitude,d.longitude],
+            {
+                radius:9,
+                color:"#ffffff",
+                weight:2,
+                fillColor:conditionColor(
+                    d.observed_crop_condition
+                ),
+                fillOpacity:0.9
+            }
+        );
+
+        marker.bindPopup(`
+
+            <strong>${escapeHTML(d.sample_id)}</strong><br>
+
+            Region: ${escapeHTML(d.region_name)}<br>
+
+            District: ${escapeHTML(d.district_name)}<br>
+
+            Crop: ${escapeHTML(d.crop_type)}<br>
+
+            Yield: ${formatNumber(d.yield_kg_ha)} kg/ha<br>
+
+            Condition:
+            ${escapeHTML(d.observed_crop_condition)}<br>
+
+            <small>Synthetic demonstration record</small>
+
+        `);
+
+        marker.addTo(markerLayer);
+
+    });
+
+
+    if (filteredField.length) {
+
+        const bounds = L.latLngBounds(
+            filteredField.map(d => [
+                d.latitude,
+                d.longitude
+            ])
+        );
+
+        map.fitBounds(
+            bounds.pad(0.25),
+            {maxZoom:10}
+        );
+
+    } else {
+
+        map.setView([13.45,-15.4],8);
+
+    }
+
+}
+
+
+// ============================================================
+// 17. DATA TABLE CONFIGURATION
+// ============================================================
+
+const tableDatasets = {
+
+    field:{
+        name:"Field Observations",
+        get data(){return filteredField;}
+    },
+
+    crop:{
+        name:"Crop-Cut Samples",
+        get data(){return filteredCrop;}
+    },
+
+    weather:{
+        name:"Weather Stations",
+        get data(){return filteredWeather;}
+    },
+
+    dictionary:{
+        name:"Data Dictionary",
+        data:dictionaryData
+    }
+
+};
+
+
+// ============================================================
+// 18. TABLE SWITCHING
+// ============================================================
+
+function switchTab(tab,button) {
+
+    currentTab = tab;
+
+    document.querySelectorAll(".tab").forEach(el =>
+        el.classList.remove("active")
+    );
+
+    button.classList.add("active");
+
+    document.getElementById("tableSearch").value = "";
+
+    renderTable();
+
+}
+
+
+// ============================================================
+// 19. TABLE RENDERING
+// ============================================================
+
+function renderTable() {
+
+    const dataset = tableDatasets[currentTab];
+
+    const data = dataset.data;
+
+    const query = document.getElementById("tableSearch")
+        .value.toLowerCase();
+
+    if (!data.length) {
+
+        document.getElementById("tableContainer").innerHTML =
+
+            "<p style='padding:15px;font-size:11px'>" +
+            "No records match the selected filters.</p>";
+
+        document.getElementById("tableStatus").textContent =
+            "0 records displayed.";
+
+        return;
+
+    }
+
+
+    const columns = Object.keys(data[0]);
+
+    const filtered = data.filter(row =>
+
+        Object.values(row).some(value =>
+            String(value).toLowerCase().includes(query)
+        )
+
+    );
+
+
+    let html = "<table><thead><tr>";
+
+    columns.forEach(column => {
+
+        html += `<th>${escapeHTML(
+            column.replaceAll("_"," ")
+        )}</th>`;
+
+    });
+
+    html += "</tr></thead><tbody>";
+
+
+    filtered.forEach(row => {
+
+        html += "<tr>";
+
+        columns.forEach(column => {
+
+            const value = row[column];
+
+            if (column === "observed_crop_condition") {
+
+                const cls = value === "Good"
+                    ? "badge"
+                    : value === "Moderate"
+                    ? "badge moderate"
+                    : "badge poor";
+
+                html += `<td><span class="${cls}">${escapeHTML(value)}</span></td>`;
+
+            } else {
+
+                html += `<td>${escapeHTML(value)}</td>`;
+
+            }
+
+        });
+
+        html += "</tr>";
+
+    });
+
+
+    html += "</tbody></table>";
+
+    document.getElementById("tableContainer").innerHTML = html;
+
+    document.getElementById("tableStatus").textContent =
+
+        filtered.length + " of " + data.length +
+        " records displayed.";
+
+}
+
+
+// ============================================================
+// 20. CSV EXPORT
+// ============================================================
+
+function csvEscape(value) {
+
+    return '"' +
+        String(value ?? "").replaceAll('"','""') +
+        '"';
+
+}
+
+
+function downloadCSV(data,filename) {
+
+    if (!data || !data.length) {
+
+        alert("There are no records to export.");
+
+        return;
+
+    }
+
+
+    const columns = Object.keys(data[0]);
+
+    const rows = [
+
+        columns.map(csvEscape).join(",")
+
+    ];
+
+
+    data.forEach(row => {
+
+        rows.push(
+            columns.map(col =>
+                csvEscape(row[col])
+            ).join(",")
+        );
+
+    });
+
+
+    const blob = new Blob(
+        ["\uFEFF" + rows.join("\r\n")],
+        {type:"text/csv;charset=utf-8;"}
+    );
+
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+
+}
+
+
+function downloadCurrentCSV() {
+
+    let data;
+    let filename;
+
+    if (currentTab === "field") {
+
+        data = filteredField;
+
+        filename = "GBoS_Gambia_Field_Observations.csv";
+
+    }
+
+    if (currentTab === "crop") {
+
+        data = filteredCrop;
+
+        filename = "GBoS_Gambia_Crop_Cut_Samples.csv";
+
+    }
+
+    if (currentTab === "weather") {
+
+        data = filteredWeather;
+
+        filename = "GBoS_Gambia_Weather_Stations.csv";
+
+    }
+
+    if (currentTab === "dictionary") {
+
+        data = dictionaryData;
+
+        filename = "GBoS_GEOAI_Data_Dictionary.csv";
+
+    }
+
+    downloadCSV(data,filename);
+
+}
+
+
+// ============================================================
+// 21. DASHBOARD UPDATE
+// ============================================================
+
+function updateDashboard() {
+
+    updateKPIs();
+
+    updateCharts();
+
+    updateMap();
+
+    renderTable();
+
+}
+
+
+// ============================================================
+// 22. INITIALISE APPLICATION
+// ============================================================
+
+updateDistrictOptions();
+
+updateCropOptions();
+
+applyFilters();
+
+
+// ============================================================
+// 23. RESPONSIVE MAP AND CHART RESIZING
+// ============================================================
+
+function resizeDashboard() {
+
+    if (map) {
+        map.invalidateSize();
+    }
+
+    Object.values(charts).forEach(chart => {
+        chart.resize();
+    });
+
+}
+
+
+window.addEventListener("load",() => {
+
+    setTimeout(resizeDashboard,500);
+
+});
+
+
+window.addEventListener("resize",() => {
+
+    resizeDashboard();
+
+});
+
+
+// ============================================================
+// 24. MAP RESIZE OBSERVER
+// ============================================================
+
+if (typeof ResizeObserver !== "undefined") {
+
+    const mapObserver = new ResizeObserver(() => {
+
+        map.invalidateSize();
+
+    });
+
+    mapObserver.observe(
+        document.getElementById("map")
+    );
+
+}
+
+</script>
+
+</body>
+</html>
