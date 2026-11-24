@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
 
 <style>
 :root{
@@ -22,220 +23,451 @@
  --muted:#70808d;
  --white:#fff;
 }
+
 *{box-sizing:border-box}
+
 html,body{
- width:100%;height:100%;margin:0;overflow:hidden;
- font-family:Arial,Helvetica,sans-serif;color:var(--text);
+ width:100%;
+ height:100%;
+ margin:0;
+ overflow:hidden;
+ font-family:Arial,Helvetica,sans-serif;
+ color:var(--text);
 }
+
 body{
- display:flex;flex-direction:column;
+ display:flex;
+ flex-direction:column;
  background:
  linear-gradient(to bottom,
-  rgba(220,35,45,.10) 0%,
-  rgba(220,35,45,.10) 20%,
-  rgba(255,255,255,.20) 20%,
-  rgba(255,255,255,.20) 23%,
-  rgba(30,85,155,.10) 23%,
-  rgba(30,85,155,.10) 77%,
-  rgba(255,255,255,.20) 77%,
-  rgba(255,255,255,.20) 80%,
-  rgba(25,125,75,.10) 80%,
-  rgba(25,125,75,.10) 100%),
+ rgba(220,35,45,.08) 0%,
+ rgba(220,35,45,.08) 20%,
+ rgba(255,255,255,.16) 20%,
+ rgba(255,255,255,.16) 23%,
+ rgba(30,85,155,.08) 23%,
+ rgba(30,85,155,.08) 77%,
+ rgba(255,255,255,.16) 77%,
+ rgba(255,255,255,.16) 80%,
+ rgba(25,125,75,.08) 80%,
+ rgba(25,125,75,.08) 100%),
  #edf2f5;
 }
+
 header{
  flex:0 0 auto;
  padding:12px 20px;
  color:white;
  background:linear-gradient(110deg,#102b43,#176b45);
- position:relative;z-index:5;
+ position:relative;
+ z-index:5;
 }
+
 .header-inner{
- display:flex;justify-content:space-between;align-items:center;
- gap:15px;flex-wrap:wrap;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:15px;
+ flex-wrap:wrap;
 }
+
 .brand{
- font-size:10px;font-weight:bold;letter-spacing:2px;
+ font-size:10px;
+ font-weight:bold;
+ letter-spacing:2px;
  color:#bde6d1;
 }
-header h1{font-size:21px;margin:5px 0}
-header p{font-size:11px;color:#dcece5;margin:0}
+
+header h1{
+ font-size:21px;
+ margin:5px 0;
+}
+
+header p{
+ font-size:11px;
+ color:#dcece5;
+ margin:0;
+}
+
 .header-tag{
- font-size:10px;padding:9px 12px;
- border:1px solid #ffffff55;border-radius:5px;
+ font-size:10px;
+ padding:9px 12px;
+ border:1px solid #ffffff55;
+ border-radius:5px;
 }
+
 main{
- flex:1 1 auto;min-height:0;min-width:0;
- display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
- gap:11px;padding:11px;
+ flex:1 1 auto;
+ min-height:0;
+ min-width:0;
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:11px;
+ padding:11px;
 }
+
 .ui-column{
- min-width:0;min-height:0;height:100%;
- display:flex;flex-direction:column;gap:11px;
- overflow-y:auto;overflow-x:hidden;
+ min-width:0;
+ min-height:0;
+ height:100%;
+ display:flex;
+ flex-direction:column;
+ gap:11px;
+ overflow-y:auto;
+ overflow-x:hidden;
  padding:2px 6px 15px 2px;
  scrollbar-width:thin;
  scrollbar-color:#93aaa0 #e5ece8;
 }
+
 .ui-column::-webkit-scrollbar{width:7px}
 .ui-column::-webkit-scrollbar-thumb{
- background:#93aaa0;border-radius:10px;
+ background:#93aaa0;
+ border-radius:10px;
 }
-.map-column{min-width:0;min-height:0;height:100%;overflow:hidden}
+
+.map-column{
+ min-width:0;
+ min-height:0;
+ height:100%;
+ overflow:hidden;
+}
+
 .map-panel{
- height:100%;display:flex;flex-direction:column;
- overflow:hidden;min-height:0;
+ height:100%;
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+ min-height:0;
 }
+
 .panel,.filters,.notice,.credits{
  background:rgba(255,255,255,.96);
  border:1px solid var(--border);
- border-radius:8px;padding:13px;
- flex:0 0 auto;min-width:0;
+ border-radius:8px;
+ padding:13px;
+ flex:0 0 auto;
+ min-width:0;
  box-shadow:0 2px 8px #102b4309;
 }
+
 .panel h2,.filters h2{
- margin:0 0 8px;color:var(--navy);font-size:14px;
+ margin:0 0 8px;
+ color:var(--navy);
+ font-size:14px;
 }
+
 .panel-desc{
- margin:0 0 12px;font-size:10px;
- line-height:1.6;color:var(--muted);
+ margin:0 0 12px;
+ font-size:10px;
+ line-height:1.6;
+ color:var(--muted);
 }
+
 .notice{
- font-size:10px;line-height:1.7;
+ font-size:10px;
+ line-height:1.7;
  border-left:4px solid var(--gold);
  background:#fffaf0;
 }
+
 .filters{padding:13px}
+
 .filter-grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
  gap:10px;
 }
+
 .filter-group label{
- display:block;font-size:10px;font-weight:bold;
- color:#5c6f7b;margin-bottom:5px;
+ display:block;
+ font-size:10px;
+ font-weight:bold;
+ color:#5c6f7b;
+ margin-bottom:5px;
 }
+
 select,input{
- width:100%;min-width:0;padding:9px;
- border:1px solid var(--border);border-radius:5px;
- background:white;color:var(--text);font-size:11px;
+ width:100%;
+ min-width:0;
+ padding:9px;
+ border:1px solid var(--border);
+ border-radius:5px;
+ background:white;
+ color:var(--text);
+ font-size:11px;
 }
+
 input[type=file]{font-size:10px}
+
 button{
- border:0;border-radius:5px;padding:9px 11px;
- font-size:10px;font-weight:bold;cursor:pointer;
+ border:0;
+ border-radius:5px;
+ padding:9px 11px;
+ font-size:10px;
+ font-weight:bold;
+ cursor:pointer;
 }
+
 button:hover{filter:brightness(.94)}
+
 .btn-primary{background:var(--green);color:white}
 .btn-dark{background:var(--navy);color:white}
 .btn-light{background:#e8f0ec;color:var(--navy)}
 .btn-gold{background:#d8ad45;color:#263746}
-.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.actions button{flex:1}
-.status{
- font-size:10px;color:var(--muted);
- line-height:1.5;margin-top:8px;
+
+.actions{
+ display:flex;
+ gap:6px;
+ flex-wrap:wrap;
+ margin-top:12px;
 }
+
+.actions button{flex:1}
+
+.status{
+ font-size:10px;
+ color:var(--muted);
+ line-height:1.5;
+ margin-top:8px;
+}
+
 .kpi-grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
  gap:8px;
 }
+
 .kpi{
  background:rgba(255,255,255,.97);
- border:1px solid var(--border);border-radius:8px;
- padding:12px;min-width:0;min-height:84px;
+ border:1px solid var(--border);
+ border-radius:8px;
+ padding:12px;
+ min-width:0;
+ min-height:84px;
 }
+
 .kpi-label{
- font-size:9px;font-weight:bold;color:var(--muted);
+ font-size:9px;
+ font-weight:bold;
+ color:var(--muted);
  margin-bottom:8px;
 }
+
 .kpi-value{
- font-size:20px;font-weight:bold;color:var(--navy);
+ font-size:20px;
+ font-weight:bold;
+ color:var(--navy);
  overflow-wrap:anywhere;
 }
-.kpi-sub{font-size:9px;color:var(--muted);margin-top:5px}
+
+.kpi-sub{
+ font-size:9px;
+ color:var(--muted);
+ margin-top:5px;
+}
+
 .chart-box{
- position:relative;height:220px;width:100%;min-width:0;
+ position:relative;
+ height:220px;
+ width:100%;
+ min-width:0;
 }
+
 .chart-box.small{height:195px}
+
 #map{
- flex:1 1 auto;min-height:200px;width:100%;
- border-radius:6px;z-index:1;
+ flex:1 1 auto;
+ min-height:200px;
+ width:100%;
+ border-radius:6px;
+ z-index:1;
 }
+
 .map-top{
- display:flex;justify-content:space-between;
- align-items:center;gap:8px;flex-wrap:wrap;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
+ flex-wrap:wrap;
  padding:12px 13px 5px;
 }
-.map-top h2{font-size:14px;color:var(--navy);margin:0}
+
+.map-top h2{
+ font-size:14px;
+ color:var(--navy);
+ margin:0;
+}
+
 .map-tools{
- display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+ display:flex;
+ gap:7px;
+ align-items:center;
+ flex-wrap:wrap;
  padding:8px 13px;
 }
-.map-tools select{width:auto;min-width:110px}
+
+.map-tools select{
+ width:auto;
+ min-width:110px;
+}
+
 .map-legend{
- flex:0 0 auto;padding:10px 13px;
+ flex:0 0 auto;
+ padding:10px 13px;
  border-top:1px solid var(--border);
- font-size:10px;line-height:1.8;
+ font-size:10px;
+ line-height:1.8;
  background:white;
 }
+
 .legend-chip{
- display:inline-block;width:10px;height:10px;
- border-radius:2px;margin:0 4px 0 9px;
+ display:inline-block;
+ width:10px;
+ height:10px;
+ border-radius:2px;
+ margin:0 4px 0 9px;
 }
+
 .stat-grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
  gap:8px;
 }
+
 .stat{
- border:1px solid var(--border);border-radius:6px;
- padding:10px;background:#fff;
+ border:1px solid var(--border);
+ border-radius:6px;
+ padding:10px;
+ background:#fff;
 }
-.stat small{font-size:9px;color:var(--muted);display:block}
-.stat strong{font-size:15px;color:var(--navy);display:block;margin-top:5px}
+
+.stat small{
+ font-size:9px;
+ color:var(--muted);
+ display:block;
+}
+
+.stat strong{
+ font-size:15px;
+ color:var(--navy);
+ display:block;
+ margin-top:5px;
+}
+
 .table-wrap{
- max-height:370px;overflow:auto;
- border:1px solid var(--border);border-radius:5px;
+ max-height:370px;
+ overflow:auto;
+ border:1px solid var(--border);
+ border-radius:5px;
 }
-table{width:100%;border-collapse:collapse;font-size:10px;white-space:nowrap}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ font-size:10px;
+ white-space:nowrap;
+}
+
 th{
- background:#174a5b;color:white;padding:9px;
- text-align:right;position:sticky;top:0;z-index:2;
+ background:#174a5b;
+ color:white;
+ padding:9px;
+ text-align:right;
+ position:sticky;
+ top:0;
+ z-index:2;
 }
+
 th:first-child,td:first-child{text-align:left}
-td{padding:8px;border-bottom:1px solid #edf0ef;text-align:right}
+
+td{
+ padding:8px;
+ border-bottom:1px solid #edf0ef;
+ text-align:right;
+}
+
 tbody tr:hover{background:#eff7f2}
+
 .method-item{
- padding:10px;margin-top:8px;background:#f5f8f7;
- border:1px solid var(--border);border-radius:6px;
+ padding:10px;
+ margin-top:8px;
+ background:#f5f8f7;
+ border:1px solid var(--border);
+ border-radius:6px;
 }
-.method-item strong{font-size:10px;color:var(--green)}
-.method-item p{font-size:10px;line-height:1.6;color:var(--muted);margin:5px 0 0}
+
+.method-item strong{
+ font-size:10px;
+ color:var(--green);
+}
+
+.method-item p{
+ font-size:10px;
+ line-height:1.6;
+ color:var(--muted);
+ margin:5px 0 0;
+}
+
 .credits{
- background:#eaf2ee;font-size:10px;line-height:1.8;
+ background:#eaf2ee;
+ font-size:10px;
+ line-height:1.8;
 }
+
 .credits strong{color:var(--navy)}
+
 footer{
- flex:0 0 auto;text-align:center;padding:8px;
- color:white;background:#102b43;font-size:9px;line-height:1.6;
+ flex:0 0 auto;
+ text-align:center;
+ padding:8px;
+ color:white;
+ background:#102b43;
+ font-size:9px;
+ line-height:1.6;
 }
+
 @media(max-width:1000px){
- main{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:7px}
+ main{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  padding:7px;
+ }
  .kpi-value{font-size:17px}
 }
+
 @media(max-width:750px){
- html,body{height:auto;min-height:100%;overflow:auto}
+ html,body{
+  height:auto;
+  min-height:100%;
+  overflow:auto;
+ }
+
  header{padding:14px}
  header h1{font-size:18px}
+
  main{
-  display:flex;flex-direction:column;
-  height:auto;overflow:visible;padding:9px;
+  display:flex;
+  flex-direction:column;
+  height:auto;
+  overflow:visible;
+  padding:9px;
  }
- .ui-column{height:auto;overflow:visible}
- .map-column{height:570px;flex:none}
+
+ .ui-column{
+  height:auto;
+  overflow:visible;
+ }
+
+ .map-column{
+  height:570px;
+  flex:none;
+ }
+
  .map-panel{height:570px}
  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  footer{padding:12px}
 }
+
 @media(max-width:390px){
  .filter-grid{grid-template-columns:1fr}
 }
@@ -267,6 +499,7 @@ footer{
 
  <section class="filters">
   <h2>Administrative and Map Controls</h2>
+
   <div class="filter-grid">
    <div class="filter-group">
     <label for="yearSelect">Census year</label>
@@ -279,12 +512,14 @@ footer{
      <option value="2024">2024</option>
     </select>
    </div>
+
    <div class="filter-group">
     <label for="lgaSelect">Local Government Area</label>
     <select id="lgaSelect">
      <option value="All">All LGAs</option>
     </select>
    </div>
+
    <div class="filter-group">
     <label for="indicatorSelect">Map indicator</label>
     <select id="indicatorSelect">
@@ -295,6 +530,7 @@ footer{
      <option value="share">Population share (%)</option>
     </select>
    </div>
+
    <div class="filter-group">
     <label for="basemapSelect">Basemap</label>
     <select id="basemapSelect">
@@ -319,7 +555,10 @@ footer{
    <button class="btn-dark" id="fitBtn">Fit boundaries</button>
    <button class="btn-gold" id="csvBtn">Export CSV</button>
   </div>
-  <div class="status" id="loadStatus">Loading census boundaries from GitHub...</div>
+
+  <div class="status" id="loadStatus">
+   Loading census boundaries from GitHub...
+  </div>
  </section>
 
  <section class="kpi-grid">
@@ -328,16 +567,19 @@ footer{
    <div class="kpi-value" id="kpiPopulation">—</div>
    <div class="kpi-sub" id="kpiPopulationSub">Selected year</div>
   </div>
+
   <div class="kpi">
    <div class="kpi-label">SELECTED LGAs</div>
    <div class="kpi-value" id="kpiLgas">8</div>
    <div class="kpi-sub">Administrative units</div>
   </div>
+
   <div class="kpi">
    <div class="kpi-label">HIGHEST POPULATION</div>
    <div class="kpi-value" id="kpiHighest">—</div>
    <div class="kpi-sub" id="kpiHighestValue">—</div>
   </div>
+
   <div class="kpi">
    <div class="kpi-label">LOWEST POPULATION</div>
    <div class="kpi-value" id="kpiLowest">—</div>
@@ -347,14 +589,22 @@ footer{
 
  <section class="panel">
   <h2>Population Trend by LGA</h2>
-  <p class="panel-desc">Historical population totals from the supplied 1973–2013 table. 2024 values are added only where verified.</p>
-  <div class="chart-box"><canvas id="trendChart"></canvas></div>
+  <p class="panel-desc">
+   Historical population totals from the supplied 1973–2013 table. 2024 values are added only where verified.
+  </p>
+  <div class="chart-box">
+   <canvas id="trendChart"></canvas>
+  </div>
  </section>
 
  <section class="panel">
   <h2>Population Growth Rate</h2>
-  <p class="panel-desc">Annual population growth rate (%) by LGA and census year.</p>
-  <div class="chart-box"><canvas id="growthChart"></canvas></div>
+  <p class="panel-desc">
+   Annual population growth rate (%) by LGA and census year.
+  </p>
+  <div class="chart-box">
+   <canvas id="growthChart"></canvas>
+  </div>
  </section>
 
 </div>
@@ -362,16 +612,20 @@ footer{
 <!-- CENTRE: MAP -->
 <div class="map-column">
  <section class="panel map-panel">
+
   <div class="map-top">
    <h2>Interactive Census Map of The Gambia</h2>
    <span class="status" id="mapYearLabel">2013 census</span>
   </div>
+
   <div class="map-tools">
    <span style="font-size:10px;font-weight:bold">Display:</span>
    <span id="mapIndicatorLabel" style="font-size:10px">Population</span>
    <button class="btn-light" id="clearBtn">Clear layer</button>
   </div>
+
   <div id="map"></div>
+
   <div class="map-legend" id="mapLegend">
    <strong>Population distribution</strong><br>
    <span class="legend-chip" style="background:#eff3ff"></span>Lower
@@ -381,6 +635,7 @@ footer{
    <span class="legend-chip" style="background:#08519c"></span>Highest
    <span class="legend-chip" style="background:#aeb8c2"></span>Missing
   </div>
+
  </section>
 </div>
 
@@ -389,7 +644,10 @@ footer{
 
  <section class="panel">
   <h2>Selected LGA Statistics</h2>
-  <p class="panel-desc">Indicators for the selected census year and administrative area.</p>
+  <p class="panel-desc">
+   Indicators for the selected census year and administrative area.
+  </p>
+
   <div class="stat-grid">
    <div class="stat"><small>Population</small><strong id="statPop">—</strong></div>
    <div class="stat"><small>Population share</small><strong id="statShare">—</strong></div>
@@ -403,30 +661,45 @@ footer{
  <section class="panel">
   <h2>Population Comparison</h2>
   <p class="panel-desc">Population totals by LGA for the selected year.</p>
-  <div class="chart-box"><canvas id="populationChart"></canvas></div>
+  <div class="chart-box">
+   <canvas id="populationChart"></canvas>
+  </div>
  </section>
 
  <section class="panel">
   <h2>Population Share Distribution</h2>
-  <p class="panel-desc">Historical shares use the supplied table. The 2024 chart requires complete 2024 LGA totals.</p>
-  <div class="chart-box"><canvas id="shareChart"></canvas></div>
+  <p class="panel-desc">
+   Historical shares use the supplied table. The 2024 chart requires complete 2024 LGA totals.
+  </p>
+  <div class="chart-box">
+   <canvas id="shareChart"></canvas>
+  </div>
  </section>
 
  <section class="panel">
   <h2>Population Density</h2>
-  <p class="panel-desc">Persons per square kilometre. Historical density values are retained as supplied.</p>
-  <div class="chart-box"><canvas id="densityChart"></canvas></div>
+  <p class="panel-desc">
+   Persons per square kilometre. Historical density values are retained as supplied. 2024 density is calculated from the 2024 population and aggregated LGA area.
+  </p>
+  <div class="chart-box">
+   <canvas id="densityChart"></canvas>
+  </div>
  </section>
 
  <section class="panel">
   <h2>LGA Population Data Table</h2>
   <p class="panel-desc">Selected census year. Missing values are displayed as unavailable.</p>
+
   <div class="table-wrap">
    <table>
     <thead>
      <tr>
-      <th>LGA</th><th>Population</th><th>Share (%)</th>
-      <th>Growth (%)</th><th>Change (%)</th><th>Density</th>
+      <th>LGA</th>
+      <th>Population</th>
+      <th>Share (%)</th>
+      <th>Growth (%)</th>
+      <th>Change (%)</th>
+      <th>Density</th>
      </tr>
     </thead>
     <tbody id="dataTable"></tbody>
@@ -436,25 +709,47 @@ footer{
 
  <section class="panel">
   <h2>Methodology and Data Notes</h2>
+
   <div class="method-item">
    <strong>Historical population</strong>
-   <p>1973, 1983, 1993, 2003 and 2013 figures are taken from the supplied historical table and are not recalculated from the GeoJSON.</p>
+   <p>
+    1973, 1983, 1993, 2003 and 2013 figures are taken from the supplied historical table and are not recalculated from the GeoJSON.
+   </p>
   </div>
+
   <div class="method-item">
    <strong>2024 census layer</strong>
-   <p>The GitHub GeoJSON provides the spatial data and available 2024 attributes. Feature values are read using recognised population and LGA property names.</p>
+   <p>
+    The GitHub GeoJSON provides the spatial data and available 2024 attributes. Feature values are read using recognised population and LGA property names.
+   </p>
   </div>
+
+  <div class="method-item">
+   <strong>2024 LGA area calculation</strong>
+   <p>
+    Area is calculated by summing the areas of EA polygons assigned to each LGA. Turf.js geometry area is used where a suitable area attribute is unavailable. This assumes the polygons do not overlap or duplicate one another.
+   </p>
+  </div>
+
   <div class="method-item">
    <strong>Annual population growth</strong>
-   <p>Calculated as the compound annual growth rate between census observations when both population values are available.</p>
+   <p>
+    Calculated as the compound annual growth rate between 2013 and 2024 when both population values are available.
+   </p>
   </div>
+
   <div class="method-item">
    <strong>Population density</strong>
-   <p>Population divided by the corresponding area in square kilometres. Confirm area units and projection before official reporting.</p>
+   <p>
+    Population divided by the corresponding area in square kilometres. Density is calculated separately for each LGA.
+   </p>
   </div>
+
   <div class="method-item">
    <strong>Missing information</strong>
-   <p>Missing census values are not interpolated or invented. The dashboard distinguishes unavailable figures from zero population.</p>
+   <p>
+    Missing census values are not interpolated or invented. The dashboard distinguishes unavailable figures from zero population.
+   </p>
   </div>
  </section>
 
@@ -478,17 +773,24 @@ footer{
 <script>
 // ==========================================================
 // 1. HISTORICAL POPULATION DATA
-// Values are transcribed from the supplied historical table.
+// Historical data is embedded in this application.
+// GeoJSON is NOT used for historical chart values.
 // ==========================================================
 
-const YEARS=[1973,1983,1993,2003,2013,2024];
+const YEARS = [1973,1983,1993,2003,2013,2024];
 
-const LGAS=[
- "Kerewan","Banjul","Kanifing","Brikama",
- "Mansakonko","Kuntaur","Janjanbureh","Basse"
+const LGAS = [
+ "Kerewan",
+ "Banjul",
+ "Kanifing",
+ "Brikama",
+ "Mansakonko",
+ "Kuntaur",
+ "Janjanbureh",
+ "Basse"
 ];
 
-const DATA={
+const DATA = {
  Kerewan:{
   pop:[93388,112225,156462,172835,220080,null],
   share:[18.9,16.3,15.1,12.7,11.9,null],
@@ -497,6 +799,7 @@ const DATA={
   area:2255.50,
   density:[41,50,69,77,98,null]
  },
+
  Banjul:{
   pop:[39179,44188,42326,35061,31054,null],
   share:[7.9,6.4,4.1,2.6,1.7,null],
@@ -505,6 +808,7 @@ const DATA={
   area:null,
   density:[3204,3613,3461,2867,2539,null]
  },
+
  Kanifing:{
   pop:[39404,101504,228214,322735,377134,null],
   share:[8.0,14.8,22.0,23.7,20.3,null],
@@ -513,6 +817,7 @@ const DATA={
   area:null,
   density:[522,1344,3021,4272,4992,null]
  },
+
  Brikama:{
   pop:[91013,137245,234917,389594,688744,null],
   share:[18.4,20.0,22.6,28.6,37.1,null],
@@ -521,6 +826,7 @@ const DATA={
   area:null,
   density:[52,78,133,221,390,null]
  },
+
  Mansakonko:{
   pop:[42447,55263,65146,72167,81042,null],
   share:[8.6,8.0,6.3,5.3,4.4,null],
@@ -529,6 +835,7 @@ const DATA={
   area:1608.00,
   density:[26,34,41,445,50,null]
  },
+
  Kuntaur:{
   pop:[47669,57594,67774,78491,96703,null],
   share:[9.7,8.4,6.5,5.8,5.2,null],
@@ -537,6 +844,7 @@ const DATA={
   area:1466.50,
   density:[33,39,46,54,66,null]
  },
+
  Janjanbureh:{
   pop:[54232,68410,88247,107212,125204,null],
   share:[11.0,9.9,8.5,7.9,6.7,null],
@@ -545,74 +853,110 @@ const DATA={
   area:null,
   density:[38,48,62,75,88,null]
  },
+
  Basse:{
   pop:[86167,111388,155059,182586,237220,null],
   share:[17.5,16.2,14.9,13.4,12.8,null],
-  growth:[null,2.6,3.4,1.6,2.6,null],
+  growth:[null,2.6,3.4,1.6,2.6],
   change:[null,29.3,39.2,17.8,29.9,null],
   area:null,
   density:[42,54,75,88,115,null]
  }
 };
 
+
 // ==========================================================
 // 2. GITHUB DATA SOURCE
 // ==========================================================
 
-const GEOJSON_URL=
+const GEOJSON_URL =
  "https://raw.githubusercontent.com/silkysingz94-oss/Gambia_Population_-_Housing_Census/main/Census_EAs_Geo.json";
 
-let geoData=null;
-let geoLayer=null;
-let charts={};
+let geoData = null;
+let geoLayer = null;
+let charts = {};
 
-const palette=[
- "#1769aa","#0d9488","#d28a35","#8664b5",
- "#c74f55","#638d75","#b18a39","#64748b"
+const palette = [
+ "#1769aa",
+ "#0d9488",
+ "#d28a35",
+ "#8664b5",
+ "#c74f55",
+ "#638d75",
+ "#b18a39",
+ "#64748b"
 ];
 
-const $=id=>document.getElementById(id);
-const fmt=(v,d=0)=>{
- if(v===null||v===undefined||!Number.isFinite(Number(v)))return "—";
+const $ = id => document.getElementById(id);
+
+const fmt = (v,d=0) => {
+ if(v===null || v===undefined || !Number.isFinite(Number(v))){
+  return "—";
+ }
+
  return Number(v).toLocaleString("en-US",{
-  minimumFractionDigits:d,maximumFractionDigits:d
+  minimumFractionDigits:d,
+  maximumFractionDigits:d
  });
 };
-const index=()=>YEARS.indexOf(Number($("yearSelect").value));
-const year=()=>Number($("yearSelect").value);
-const selected=()=>$("lgaSelect").value;
-const selectedLGAs=()=>selected()==="All"?LGAS:[selected];
+
+const index = () => YEARS.indexOf(Number($("yearSelect").value));
+const year = () => Number($("yearSelect").value);
+const selected = () => $("lgaSelect").value;
+
+const selectedLGAs = () =>
+ selected()==="All" ? LGAS : [selected()];
 
 function val(lga,key,i=index()){
- const v=DATA[lga]?.[key]?.[i];
- return v===undefined||v===null?null:Number(v);
+ const v = DATA[lga]?.[key]?.[i];
+ return v===undefined || v===null ? null : Number(v);
 }
 
+
 // ==========================================================
-// 3. MAP
+// 3. MAP INITIALISATION
 // ==========================================================
 
-const map=L.map("map",{zoomControl:true}).setView([13.45,-15.45],7);
+const map = L.map("map",{
+ zoomControl:true
+}).setView([13.45,-15.45],7);
 
-const basemaps={
- street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  maxZoom:19,attribution:"© OpenStreetMap"
- }),
- satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
-  maxZoom:19,attribution:"© Esri"
- }),
- terrain:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{
-  maxZoom:17,attribution:"© OpenTopoMap"
- })
+const basemaps = {
+ street:L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+   maxZoom:19,
+   attribution:"© OpenStreetMap"
+  }
+ ),
+
+ satellite:L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+   maxZoom:19,
+   attribution:"© Esri"
+  }
+ ),
+
+ terrain:L.tileLayer(
+  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  {
+   maxZoom:17,
+   attribution:"© OpenTopoMap"
+  }
+ )
 };
+
 basemaps.street.addTo(map);
 
 $("basemapSelect").addEventListener("change",()=>{
  Object.values(basemaps).forEach(layer=>{
-  if(map.hasLayer(layer))map.removeLayer(layer);
+  if(map.hasLayer(layer)) map.removeLayer(layer);
  });
+
  basemaps[$("basemapSelect").value].addTo(map);
 });
+
 
 // ==========================================================
 // 4. GEOJSON ATTRIBUTE RECOGNITION
@@ -620,17 +964,24 @@ $("basemapSelect").addEventListener("change",()=>{
 
 function getProp(properties,names){
  for(const name of names){
-  if(properties[name]!==undefined&&properties[name]!==null&&properties[name]!==""){
+  if(
+   properties[name]!==undefined &&
+   properties[name]!==null &&
+   properties[name]!==""
+  ){
    return properties[name];
   }
  }
+
  return null;
 }
 
 function normalizeName(value){
- if(!value)return "";
- let s=String(value).toLowerCase().trim();
- const aliases={
+ if(!value) return "";
+
+ const s = String(value).toLowerCase().trim();
+
+ const aliases = {
   "west coast":"brikama",
   "west coast region":"brikama",
   "north bank":"kerewan",
@@ -643,141 +994,391 @@ function normalizeName(value){
   "upper river region":"basse",
   "kanifing municipality":"kanifing"
  };
- return aliases[s]||s;
+
+ return aliases[s] || s;
 }
 
 function featureLGA(properties){
- const raw=getProp(properties,[
-  "lganame","LGA","lga","LGA_NAME","lga_name",
-  "admin_name","NAME_1","NAME"
+ const raw = getProp(properties,[
+  "lganame",
+  "LGA",
+  "lga",
+  "LGA_NAME",
+  "lga_name",
+  "admin_name",
+  "NAME_1",
+  "NAME"
  ]);
- const normalized=normalizeName(raw);
- return LGAS.find(n=>normalizeName(n)===normalized)||null;
+
+ const normalized = normalizeName(raw);
+
+ return LGAS.find(
+  n => normalizeName(n)===normalized
+ ) || null;
 }
 
 function numericProperty(properties,names){
- const raw=getProp(properties,names);
- if(raw===null)return null;
- const n=Number(String(raw).replace(/,/g,""));
- return Number.isFinite(n)?n:null;
+ const raw = getProp(properties,names);
+
+ if(raw===null) return null;
+
+ const n = Number(String(raw).replace(/,/g,""));
+
+ return Number.isFinite(n) ? n : null;
 }
 
 function featurePopulation(properties){
  return numericProperty(properties,[
-  "Pop_2024","POP_2024","pop_2024","population_2024",
-  "sum_pop","enum_pop","map_pop","total_pop",
-  "Pop2024","POP2024"
+  "Pop_2024",
+  "POP_2024",
+  "pop_2024",
+  "population_2024",
+  "sum_pop",
+  "enum_pop",
+  "map_pop",
+  "total_pop",
+  "Pop2024",
+  "POP2024"
  ]);
 }
 
-function featureAreaKm2(properties){
- const area=numericProperty(properties,[
-  "Shape_Area","shape_area","Area_sqkm","area_sqkm","area_km2"
- ]);
- if(area===null)return null;
- // Shape_Area is commonly square metres in projected GeoJSON.
- return area>100000?area/1000000:area;
-}
 
 // ==========================================================
-// 5. 2024 LGA AGGREGATION
-// Avoid summing an LGA total repeated on every EA feature.
+// 5. POLYGON AREA CALCULATION
+// ==========================================================
+
+// Uses the GeoJSON polygon geometry and Turf.js to calculate
+// area in square kilometres.
+
+function geometryAreaKm2(feature){
+
+ if(!feature || !feature.geometry) return null;
+
+ try{
+
+  const areaM2 = turf.area(feature);
+
+  if(
+   Number.isFinite(areaM2) &&
+   areaM2 > 0
+  ){
+   return areaM2 / 1000000;
+  }
+
+ }catch(error){
+  console.warn("Polygon area calculation failed:",error);
+ }
+
+ return null;
+}
+
+
+// Read area attributes when they are available.
+// Shape_Area is interpreted as square metres when large.
+// Area_sqkm is interpreted as square kilometres.
+
+function featureAreaAttributeKm2(properties){
+
+ const squareKm = numericProperty(properties,[
+  "Area_sqkm",
+  "area_sqkm",
+  "area_km2",
+  "AREA_KM2",
+  "Shape_Area_km2"
+ ]);
+
+ if(squareKm!==null && squareKm>0){
+  return squareKm;
+ }
+
+ const shapeArea = numericProperty(properties,[
+  "Shape_Area",
+  "shape_area",
+  "Shape_Area_m2"
+ ]);
+
+ if(shapeArea!==null && shapeArea>0){
+  return shapeArea/1000000;
+ }
+
+ return null;
+}
+
+
+// Prefer geometry area for EA polygon features.
+// This avoids mixing incompatible source area units.
+
+function featureAreaKm2(feature){
+
+ const geometryArea = geometryAreaKm2(feature);
+
+ if(geometryArea!==null && geometryArea>0){
+  return geometryArea;
+ }
+
+ return featureAreaAttributeKm2(
+  feature.properties || {}
+ );
+}
+
+
+// ==========================================================
+// 6. 2024 LGA AGGREGATION
+// FIX: aggregate area from ALL EA polygons per LGA.
 // ==========================================================
 
 function build2024LGAData(){
- if(!geoData?.features)return;
 
- const groups={};
- geoData.features.forEach(feature=>{
-  const p=feature.properties||{};
-  const lga=featureLGA(p);
-  if(!lga)return;
-  if(!groups[lga])groups[lga]=[];
-  groups[lga].push(p);
- });
+ if(!geoData || !Array.isArray(geoData.features)) return;
+
+ const groups = {};
 
  LGAS.forEach(lga=>{
-  const records=groups[lga]||[];
-  if(!records.length)return;
+  groups[lga] = [];
+ });
 
-  const values=records.map(p=>featurePopulation(p))
-   .filter(v=>v!==null);
+ geoData.features.forEach(feature=>{
 
-  if(!values.length)return;
+  const properties = feature.properties || {};
+  const lga = featureLGA(properties);
 
-  // If one feature per LGA, use the LGA figure.
-  // For multiple EA features, aggregate EA-level values only
-  // when the population field appears to vary between records.
-  let total=null;
-  if(records.length===1){
-   total=values[0];
-  }else{
-   const unique=new Set(values);
-   if(unique.size>1){
-    total=values.reduce((a,b)=>a+b,0);
+  if(!lga) return;
+
+  groups[lga].push(feature);
+ });
+
+
+ LGAS.forEach(lga=>{
+
+  const records = groups[lga] || [];
+
+  if(!records.length) return;
+
+
+  // --------------------------------------------------------
+  // POPULATION AGGREGATION
+  // --------------------------------------------------------
+
+  const populationValues = records
+   .map(feature=>featurePopulation(feature.properties || {}))
+   .filter(value=>
+    value!==null &&
+    Number.isFinite(value) &&
+    value>=0
+   );
+
+  if(populationValues.length){
+
+   const uniqueValues = [...new Set(populationValues)];
+
+   let totalPopulation = null;
+
+   if(records.length===1){
+
+    totalPopulation = populationValues[0];
+
+   }else if(uniqueValues.length===1){
+
+    // Repeated identical LGA totals are counted once.
+    totalPopulation = uniqueValues[0];
+
    }else{
-    // Repeated identical LGA totals are not added repeatedly.
-    total=values[0];
+
+    // Different values are treated as feature-level
+    // population records and summed.
+    totalPopulation = populationValues.reduce(
+     (sum,value)=>sum+value,
+     0
+    );
+   }
+
+   DATA[lga].pop[5] = totalPopulation;
+  }
+
+
+  // --------------------------------------------------------
+  // AREA AGGREGATION
+  // --------------------------------------------------------
+
+  const areaValues = records
+   .map(feature=>featureAreaKm2(feature))
+   .filter(value=>
+    value!==null &&
+    Number.isFinite(value) &&
+    value>0
+   );
+
+  if(areaValues.length){
+
+   // IMPORTANT:
+   // Aggregate ALL EA polygon areas for the LGA.
+   // Do not require areas.length === 1.
+   const totalAreaKm2 = areaValues.reduce(
+    (sum,value)=>sum+value,
+    0
+   );
+
+   if(
+    Number.isFinite(totalAreaKm2) &&
+    totalAreaKm2>0
+   ){
+    DATA[lga].area = totalAreaKm2;
    }
   }
 
-  if(total!==null){
-   DATA[lga].pop[5]=total;
-  }
 
-  const areas=records.map(p=>featureAreaKm2(p))
-   .filter(v=>v!==null);
+  // Diagnostics for checking the eight LGA calculations.
+  console.log(
+   "2024 LGA area:",
+   lga,
+   "Features:",
+   records.length,
+   "Area records:",
+   areaValues.length,
+   "Area km²:",
+   DATA[lga].area,
+   "Population:",
+   DATA[lga].pop[5]
+  );
 
-  if(areas.length===1)DATA[lga].area=areas[0];
  });
 }
 
+
 // ==========================================================
-// 6. 2024 DERIVED INDICATORS
+// 7. 2024 DERIVED INDICATORS
 // ==========================================================
 
 function calculate2024(){
+
  LGAS.forEach(lga=>{
-  const d=DATA[lga];
-  const old=d.pop[4],now=d.pop[5];
 
-  if(old!==null&&now!==null&&old>0){
-   d.change[5]=(now-old)/old*100;
-   d.growth[5]=(Math.pow(now/old,1/11)-1)*100;
+  const d = DATA[lga];
+
+  const previousPopulation = d.pop[4];
+  const currentPopulation = d.pop[5];
+
+
+  // Inter-censal change from 2013 to 2024.
+  if(
+   previousPopulation!==null &&
+   currentPopulation!==null &&
+   previousPopulation>0
+  ){
+
+   d.change[5] =
+    ((currentPopulation-previousPopulation) /
+    previousPopulation)*100;
+
+   // Annual compound growth rate over 11 years.
+   d.growth[5] =
+    (Math.pow(
+     currentPopulation/previousPopulation,
+     1/11
+    )-1)*100;
+
+  }else{
+
+   d.change[5] = null;
+   d.growth[5] = null;
   }
 
-  if(now!==null&&d.area!==null&&d.area>0){
-   d.density[5]=now/d.area;
+
+  // 2024 population density.
+  if(
+   currentPopulation!==null &&
+   Number.isFinite(currentPopulation) &&
+   d.area!==null &&
+   Number.isFinite(d.area) &&
+   d.area>0
+  ){
+
+   d.density[5] = currentPopulation/d.area;
+
+  }else{
+
+   d.density[5] = null;
   }
+
  });
 
- const allAvailable=LGAS.every(lga=>DATA[lga].pop[5]!==null);
+
+ // Population share is calculated only if all eight
+ // LGA population totals are available.
+
+ const allAvailable = LGAS.every(lga=>
+  DATA[lga].pop[5]!==null &&
+  Number.isFinite(DATA[lga].pop[5])
+ );
+
  if(allAvailable){
-  const total=LGAS.reduce((s,lga)=>s+DATA[lga].pop[5],0);
+
+  const nationalTotal = LGAS.reduce(
+   (sum,lga)=>sum+DATA[lga].pop[5],
+   0
+  );
+
+  if(nationalTotal>0){
+
+   LGAS.forEach(lga=>{
+    DATA[lga].share[5] =
+     DATA[lga].pop[5]/nationalTotal*100;
+   });
+
+  }
+
+ }else{
+
   LGAS.forEach(lga=>{
-   DATA[lga].share[5]=DATA[lga].pop[5]/total*100;
+   DATA[lga].share[5] = null;
   });
+
  }
 }
 
+
 // ==========================================================
-// 7. MAP STYLING AND POPUPS
+// 8. MAP INDICATORS
 // ==========================================================
 
-function mapMetric(lga,properties){
- const i=index();
- const indicator=$("indicatorSelect").value;
+function mapMetric(lga,feature){
+
+ const indicator = $("indicatorSelect").value;
+ const i = index();
+
+ if(!lga) return null;
 
  if(year()===2024){
-  if(indicator==="population")return featurePopulation(properties)??val(lga,"population",i);
-  if(indicator==="density"){
-   const pop=featurePopulation(properties);
-   const area=featureAreaKm2(properties);
-   return pop!==null&&area!==null&&area>0?pop/area:val(lga,"density",i);
+
+  const p = feature.properties || {};
+
+  if(indicator==="population"){
+
+   return featurePopulation(p) ?? val(lga,"pop",i);
   }
+
+  if(indicator==="density"){
+
+   // Display the LGA density consistently across
+   // all EA polygons belonging to that LGA.
+   return val(lga,"density",i);
+  }
+
+  if(indicator==="growth"){
+   return val(lga,"growth",i);
+  }
+
+  if(indicator==="change"){
+   return val(lga,"change",i);
+  }
+
+  if(indicator==="share"){
+   return val(lga,"share",i);
+  }
+
  }
 
- const key={
+ const key = {
   population:"pop",
   density:"density",
   growth:"growth",
@@ -785,417 +1386,935 @@ function mapMetric(lga,properties){
   share:"share"
  }[indicator];
 
- return lga?val(lga,key,i):null;
+ return val(lga,key,i);
 }
 
+
+// ==========================================================
+// 9. MAP COLOUR CLASSIFICATION
+// ==========================================================
+
 function colour(value,all){
- if(value===null||!Number.isFinite(value))return "#aeb8c2";
- const valid=all.filter(v=>v!==null&&Number.isFinite(v));
- if(!valid.length)return "#aeb8c2";
- const min=Math.min(...valid),max=Math.max(...valid);
- if(min===max)return "#3182bd";
- const q=(value-min)/(max-min);
- if(q<=.2)return "#eff3ff";
- if(q<=.4)return "#bdd7e7";
- if(q<=.6)return "#6baed6";
- if(q<=.8)return "#3182bd";
+
+ if(value===null || !Number.isFinite(value)){
+  return "#aeb8c2";
+ }
+
+ const valid = all.filter(v=>
+  v!==null &&
+  Number.isFinite(v)
+ );
+
+ if(!valid.length) return "#aeb8c2";
+
+ const min = Math.min(...valid);
+ const max = Math.max(...valid);
+
+ if(min===max) return "#3182bd";
+
+ const q = (value-min)/(max-min);
+
+ if(q<=.2) return "#eff3ff";
+ if(q<=.4) return "#bdd7e7";
+ if(q<=.6) return "#6baed6";
+ if(q<=.8) return "#3182bd";
+
  return "#08519c";
 }
 
+
+// ==========================================================
+// 10. MAP RENDERING
+// ==========================================================
+
 function updateMap(){
- $("mapYearLabel").textContent=year()+" census";
- $("mapIndicatorLabel").textContent=$("indicatorSelect").selectedOptions[0].text;
 
- if(!geoData)return;
- if(geoLayer)map.removeLayer(geoLayer);
+ $("mapYearLabel").textContent = year()+" census";
 
- const values=[];
- geoData.features.forEach(f=>{
-  const lga=featureLGA(f.properties||{});
-  if(selected()!=="All"&&lga!==selected())return;
-  values.push(mapMetric(lga,f.properties||{}));
+ $("mapIndicatorLabel").textContent =
+  $("indicatorSelect").selectedOptions[0].text;
+
+ if(!geoData) return;
+
+ if(geoLayer){
+  map.removeLayer(geoLayer);
+  geoLayer = null;
+ }
+
+ const visibleFeatures = geoData.features.filter(feature=>{
+
+  const lga = featureLGA(feature.properties || {});
+
+  return selected()==="All" || lga===selected();
+
  });
 
- geoLayer=L.geoJSON(geoData,{
+ const values = visibleFeatures.map(feature=>{
+
+  const lga = featureLGA(feature.properties || {});
+
+  return mapMetric(lga,feature);
+ });
+
+
+ geoLayer = L.geoJSON(geoData,{
+
   filter:feature=>{
-   const lga=featureLGA(feature.properties||{});
-   return selected()==="All"||lga===selected();
+
+   const lga = featureLGA(feature.properties || {});
+
+   return selected()==="All" || lga===selected();
   },
+
   style:feature=>{
-   const p=feature.properties||{};
-   const lga=featureLGA(p);
+
+   const lga = featureLGA(feature.properties || {});
+
    return {
-    fillColor:colour(mapMetric(lga,p),values),
-    weight:.65,color:"#536b79",
-    opacity:.9,fillOpacity:.72
+    fillColor:colour(mapMetric(lga,feature),values),
+    weight:.65,
+    color:"#536b79",
+    opacity:.9,
+    fillOpacity:.72
    };
   },
+
   onEachFeature:(feature,layer)=>{
-   const p=feature.properties||{};
-   const lga=featureLGA(p)||"Unknown LGA";
-   const pop=featurePopulation(p);
-   const area=featureAreaKm2(p);
-   const metric=mapMetric(lga,p);
+
+   const p = feature.properties || {};
+
+   const lga = featureLGA(p) || "Unknown LGA";
+
+   const pop = featurePopulation(p);
+
+   const area = featureAreaKm2(feature);
+
+   const density = val(lga,"density",index());
+
+   const metric = mapMetric(lga,feature);
 
    layer.bindPopup(
     "<b>"+lga+"</b><br>"+
     "Census year: "+year()+"<br>"+
-    "Map indicator: "+$("indicatorSelect").selectedOptions[0].text+"<br>"+
-    "Value: "+fmt(metric,2)+"<br>"+
-    (pop!==null?"2024 population attribute: "+fmt(pop)+"<br>":"")+
-    (area!==null?"Area (km²): "+fmt(area,3):"")
+    "Map indicator: "+
+    $("indicatorSelect").selectedOptions[0].text+"<br>"+
+    "Displayed value: "+fmt(metric,2)+"<br>"+
+    (pop!==null?
+     "Feature population attribute: "+fmt(pop)+"<br>":"")+
+    (area!==null?
+     "Feature area (km²): "+fmt(area,4)+"<br>":"")+
+    (year()===2024 && density!==null?
+     "LGA density (persons/km²): "+fmt(density,2):"")
    );
+
   }
+
  }).addTo(map);
 
- try{map.fitBounds(geoLayer.getBounds(),{padding:[12,12],maxZoom:10});}
- catch(e){}
 
- $("mapLegend").innerHTML=
-  "<b>"+year()+" • "+$("indicatorSelect").selectedOptions[0].text+"</b><br>"+
+ try{
+
+  const bounds = geoLayer.getBounds();
+
+  if(bounds.isValid()){
+   map.fitBounds(bounds,{
+    padding:[12,12],
+    maxZoom:10
+   });
+  }
+
+ }catch(error){
+  console.warn("Map bounds error:",error);
+ }
+
+
+ $("mapLegend").innerHTML =
+  "<b>"+year()+" • "+
+  $("indicatorSelect").selectedOptions[0].text+
+  "</b><br>"+
   "<span class='legend-chip' style='background:#eff3ff'></span>Lowest "+
   "<span class='legend-chip' style='background:#bdd7e7'></span>Low "+
   "<span class='legend-chip' style='background:#6baed6'></span>Medium "+
   "<span class='legend-chip' style='background:#3182bd'></span>High "+
   "<span class='legend-chip' style='background:#08519c'></span>Highest "+
   "<span class='legend-chip' style='background:#aeb8c2'></span>Missing";
+
 }
 
+
 // ==========================================================
-// 8. CHART HELPERS
+// 11. CHART HELPERS
 // ==========================================================
 
 function makeChart(id,type,labels,datasets,extra={}){
- const canvas=$(id);
- if(!canvas)return;
 
- const defaults={
+ const canvas = $(id);
+
+ if(!canvas) return;
+
+ const defaults = {
+
   responsive:true,
   maintainAspectRatio:false,
   animation:false,
+
   plugins:{
-   legend:{display:type==="line"||type==="doughnut",position:"bottom",
-    labels:{font:{size:9},boxWidth:10}}
+   legend:{
+    display:type==="line" || type==="doughnut",
+    position:"bottom",
+    labels:{
+     font:{size:9},
+     boxWidth:10
+    }
+   }
   },
-  scales:type==="doughnut"?{}:{
-   x:{ticks:{font:{size:9}}},
-   y:{beginAtZero:true,ticks:{font:{size:9}}}
+
+  scales:type==="doughnut" ? {} : {
+   x:{
+    ticks:{font:{size:9}}
+   },
+   y:{
+    beginAtZero:true,
+    ticks:{font:{size:9}}
+   }
+  }
+
+ };
+
+
+ const options = {
+  ...defaults,
+  ...extra,
+
+  plugins:{
+   ...defaults.plugins,
+   ...(extra.plugins || {})
+  },
+
+  scales:{
+   ...defaults.scales,
+   ...(extra.scales || {})
   }
  };
 
- const options={
-  ...defaults,...extra,
-  plugins:{...defaults.plugins,...(extra.plugins||{})},
-  scales:{...defaults.scales,...(extra.scales||{})}
- };
 
  if(charts[id]){
-  charts[id].data.labels=labels;
-  charts[id].data.datasets=datasets;
-  charts[id].options=options;
+
+  charts[id].data.labels = labels;
+  charts[id].data.datasets = datasets;
+  charts[id].options = options;
   charts[id].update("none");
+
  }else{
-  charts[id]=new Chart(canvas.getContext("2d"),{
-   type,data:{labels,datasets},options
-  });
+
+  charts[id] = new Chart(
+   canvas.getContext("2d"),
+   {
+    type:type,
+    data:{
+     labels:labels,
+     datasets:datasets
+    },
+    options:options
+   }
+  );
+
  }
+
 }
 
+
 // ==========================================================
-// 9. UPDATE ALL CHARTS
-// Historical chart series are sourced from DATA only.
+// 12. UPDATE ALL CHARTS
+// Historical chart values come from embedded DATA.
 // ==========================================================
 
 function updateCharts(){
- const chosen=selectedLGAs();
- const i=index();
 
- makeChart("trendChart","line",YEARS.map(String),
+ const chosen = selectedLGAs();
+ const i = index();
+
+
+ // POPULATION TREND
+
+ makeChart(
+  "trendChart",
+  "line",
+  YEARS.map(String),
+
   chosen.map(lga=>({
+
    label:lga,
    data:DATA[lga].pop,
+
    borderColor:palette[LGAS.indexOf(lga)],
    backgroundColor:palette[LGAS.indexOf(lga)],
-   borderWidth:2,pointRadius:3,tension:.25,spanGaps:false
+
+   borderWidth:2,
+   pointRadius:3,
+   tension:.25,
+   spanGaps:false
+
   }))
  );
 
- const available=chosen.filter(lga=>val(lga,"pop",i)!==null);
- makeChart("populationChart","bar",available,
+
+ // POPULATION COMPARISON
+
+ const available = chosen.filter(lga=>
+  val(lga,"pop",i)!==null
+ );
+
+ makeChart(
+  "populationChart",
+  "bar",
+  available,
+
   [{
    label:"Population "+year(),
-   data:available.map(lga=>val(lga,"pop",i)),
-   backgroundColor:available.map(lga=>palette[LGAS.indexOf(lga)])
+
+   data:available.map(lga=>
+    val(lga,"pop",i)
+   ),
+
+   backgroundColor:available.map(lga=>
+    palette[LGAS.indexOf(lga)]
+   )
   }],
+
   {
    indexAxis:"y",
-   plugins:{legend:{display:false}},
-   scales:{x:{beginAtZero:true},y:{ticks:{font:{size:9}}}}
+
+   plugins:{
+    legend:{display:false}
+   },
+
+   scales:{
+    x:{beginAtZero:true},
+    y:{ticks:{font:{size:9}}}
+   }
   }
  );
 
- const shares=chosen.filter(lga=>val(lga,"share",i)!==null);
- makeChart("shareChart","doughnut",shares,
+
+ // POPULATION SHARE
+
+ const shares = chosen.filter(lga=>
+  val(lga,"share",i)!==null
+ );
+
+ makeChart(
+  "shareChart",
+  "doughnut",
+  shares,
+
   [{
    label:"Population share (%)",
-   data:shares.map(lga=>val(lga,"share",i)),
-   backgroundColor:shares.map(lga=>palette[LGAS.indexOf(lga)])
+
+   data:shares.map(lga=>
+    val(lga,"share",i)
+   ),
+
+   backgroundColor:shares.map(lga=>
+    palette[LGAS.indexOf(lga)]
+   )
   }]
  );
 
- const growth=chosen.filter(lga=>val(lga,"growth",i)!==null);
- makeChart("growthChart","bar",growth,
+
+ // ANNUAL GROWTH
+
+ const growth = chosen.filter(lga=>
+  val(lga,"growth",i)!==null
+ );
+
+ makeChart(
+  "growthChart",
+  "bar",
+  growth,
+
   [{
    label:"Annual growth (%)",
-   data:growth.map(lga=>val(lga,"growth",i)),
-   backgroundColor:growth.map(lga=>palette[LGAS.indexOf(lga)])
-  }],
-  {plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+"%"}}}}
- );
 
- const density=chosen.filter(lga=>val(lga,"density",i)!==null);
- makeChart("densityChart","bar",density,
-  [{
-   label:"Persons per km²",
-   data:density.map(lga=>val(lga,"density",i)),
-   backgroundColor:density.map(lga=>palette[LGAS.indexOf(lga)])
+   data:growth.map(lga=>
+    val(lga,"growth",i)
+   ),
+
+   backgroundColor:growth.map(lga=>
+    palette[LGAS.indexOf(lga)]
+   )
   }],
+
   {
-   indexAxis:"y",
-   plugins:{legend:{display:false}},
-   scales:{x:{beginAtZero:true},y:{ticks:{font:{size:9}}}}
+   plugins:{
+    legend:{display:false}
+   },
+
+   scales:{
+    y:{
+     ticks:{
+      callback:value=>value+"%"
+     }
+    }
+   }
   }
  );
+
+
+ // POPULATION DENSITY
+ // The 2024 density values are calculated separately
+ // for every LGA in calculate2024().
+
+ const density = chosen.filter(lga=>
+  val(lga,"density",i)!==null
+ );
+
+ makeChart(
+  "densityChart",
+  "bar",
+  density,
+
+  [{
+   label:"Persons per km²",
+
+   data:density.map(lga=>
+    val(lga,"density",i)
+   ),
+
+   backgroundColor:density.map(lga=>
+    palette[LGAS.indexOf(lga)]
+   )
+  }],
+
+  {
+   indexAxis:"y",
+
+   plugins:{
+    legend:{display:false}
+   },
+
+   scales:{
+    x:{beginAtZero:true},
+    y:{ticks:{font:{size:9}}}
+   }
+  }
+ );
+
 }
 
+
 // ==========================================================
-// 10. KPIs AND SELECTED LGA STATISTICS
+// 13. KPIs AND SELECTED LGA STATISTICS
 // ==========================================================
 
 function updateKPIs(){
- const i=index(),chosen=selectedLGAs();
- const records=chosen.map(lga=>({lga,pop:val(lga,"pop",i)}))
-  .filter(x=>x.pop!==null);
 
- const complete=records.length===chosen.length;
- const total=complete?records.reduce((s,x)=>s+x.pop,0):null;
- const highest=records.length?records.reduce((a,b)=>a.pop>b.pop?a:b):null;
- const lowest=records.length?records.reduce((a,b)=>a.pop<b.pop?a:b):null;
+ const i = index();
+ const chosen = selectedLGAs();
 
- $("kpiPopulation").textContent=total===null?"Incomplete":fmt(total);
- $("kpiPopulationSub").textContent=year()+" census • "+(complete?"complete selected total":"some LGA values unavailable");
- $("kpiLgas").textContent=chosen.length;
- $("kpiHighest").textContent=highest?highest.lga:"—";
- $("kpiHighestValue").textContent=highest?fmt(highest.pop):"No data";
- $("kpiLowest").textContent=lowest?lowest.lga:"—";
- $("kpiLowestValue").textContent=lowest?fmt(lowest.pop):"No data";
+ const records = chosen.map(lga=>({
 
- const lga=selected();
- const d=DATA[lga];
+  lga:lga,
+  pop:val(lga,"pop",i)
 
- $("statPop").textContent=lga==="All"?"Select one LGA":fmt(val(lga,"pop",i));
- $("statShare").textContent=lga==="All"?"—":(val(lga,"share",i)===null?"—":fmt(val(lga,"share",i),2)+"%");
- $("statGrowth").textContent=lga==="All"?"—":(val(lga,"growth",i)===null?"—":fmt(val(lga,"growth",i),2)+"%");
- $("statChange").textContent=lga==="All"?"—":(val(lga,"change",i)===null?"—":fmt(val(lga,"change",i),2)+"%");
- $("statArea").textContent=lga==="All"?"—":(d.area===null?"—":fmt(d.area,2));
- $("statDensity").textContent=lga==="All"?"—":(val(lga,"density",i)===null?"—":fmt(val(lga,"density",i)));
+ })).filter(x=>x.pop!==null);
+
+
+ const complete = records.length===chosen.length;
+
+ const total = complete
+  ? records.reduce((sum,x)=>sum+x.pop,0)
+  : null;
+
+ const highest = records.length
+  ? records.reduce((a,b)=>a.pop>b.pop?a:b)
+  : null;
+
+ const lowest = records.length
+  ? records.reduce((a,b)=>a.pop<b.pop?a:b)
+  : null;
+
+
+ $("kpiPopulation").textContent =
+  total===null ? "Incomplete" : fmt(total);
+
+ $("kpiPopulationSub").textContent =
+  year()+" census • "+
+  (complete
+   ?"complete selected total"
+   :"some LGA values unavailable");
+
+ $("kpiLgas").textContent = chosen.length;
+
+ $("kpiHighest").textContent =
+  highest ? highest.lga : "—";
+
+ $("kpiHighestValue").textContent =
+  highest ? fmt(highest.pop) : "No data";
+
+ $("kpiLowest").textContent =
+  lowest ? lowest.lga : "—";
+
+ $("kpiLowestValue").textContent =
+  lowest ? fmt(lowest.pop) : "No data";
+
+
+ const lga = selected();
+
+ const d = DATA[lga];
+
+ $("statPop").textContent =
+  lga==="All" ? "Select one LGA" : fmt(val(lga,"pop",i));
+
+ $("statShare").textContent =
+  lga==="All" || val(lga,"share",i)===null
+  ? "—"
+  : fmt(val(lga,"share",i),2)+"%";
+
+ $("statGrowth").textContent =
+  lga==="All" || val(lga,"growth",i)===null
+  ? "—"
+  : fmt(val(lga,"growth",i),2)+"%";
+
+ $("statChange").textContent =
+  lga==="All" || val(lga,"change",i)===null
+  ? "—"
+  : fmt(val(lga,"change",i),2)+"%";
+
+ $("statArea").textContent =
+  lga==="All" || d.area===null
+  ? "—"
+  : fmt(d.area,2);
+
+ $("statDensity").textContent =
+  lga==="All" || val(lga,"density",i)===null
+  ? "—"
+  : fmt(val(lga,"density",i),2);
+
 }
 
+
 // ==========================================================
-// 11. DATA TABLE
+// 14. DATA TABLE
 // ==========================================================
 
 function updateTable(){
- const i=index();
- $("dataTable").innerHTML="";
+
+ const i = index();
+
+ $("dataTable").innerHTML = "";
 
  selectedLGAs().forEach(lga=>{
-  const row=document.createElement("tr");
-  const values=[
+
+  const row = document.createElement("tr");
+
+  const values = [
    lga,
    fmt(val(lga,"pop",i)),
-   val(lga,"share",i)===null?"—":fmt(val(lga,"share",i),2),
-   val(lga,"growth",i)===null?"—":fmt(val(lga,"growth",i),2),
-   val(lga,"change",i)===null?"—":fmt(val(lga,"change",i),2),
-   val(lga,"density",i)===null?"—":fmt(val(lga,"density",i))
+   val(lga,"share",i)===null
+    ? "—"
+    : fmt(val(lga,"share",i),2),
+   val(lga,"growth",i)===null
+    ? "—"
+    : fmt(val(lga,"growth",i),2),
+   val(lga,"change",i)===null
+    ? "—"
+    : fmt(val(lga,"change",i),2),
+   val(lga,"density",i)===null
+    ? "—"
+    : fmt(val(lga,"density",i),2)
   ];
-  values.forEach(v=>{
-   const td=document.createElement("td");
-   td.textContent=v;
+
+  values.forEach(value=>{
+
+   const td = document.createElement("td");
+
+   td.textContent = value;
+
    row.appendChild(td);
+
   });
+
   $("dataTable").appendChild(row);
+
  });
+
 }
 
+
 // ==========================================================
-// 12. RENDER
+// 15. RENDER ALL DASHBOARD COMPONENTS
 // ==========================================================
 
 function render(){
+
  updateKPIs();
  updateCharts();
  updateTable();
  updateMap();
+
 }
 
-function populateLGASelect(){
- const select=$("lgaSelect");
- LGAS.forEach(lga=>{
-  const option=document.createElement("option");
-  option.value=lga;option.textContent=lga;
-  select.appendChild(option);
- });
-}
 
 // ==========================================================
-// 13. CSV EXPORT
+// 16. POPULATE LGA SELECTOR
+// ==========================================================
+
+function populateLGASelect(){
+
+ const select = $("lgaSelect");
+
+ LGAS.forEach(lga=>{
+
+  const option = document.createElement("option");
+
+  option.value = lga;
+  option.textContent = lga;
+
+  select.appendChild(option);
+
+ });
+
+}
+
+
+// ==========================================================
+// 17. CSV EXPORT
 // ==========================================================
 
 function exportCSV(){
- const i=index();
- const rows=[[
-  "LGA","Census Year","Population","Share (%)",
-  "Annual Growth (%)","Inter-censal Change (%)",
-  "Area (km2)","Density (persons per km2)"
+
+ const i = index();
+
+ const rows = [[
+  "LGA",
+  "Census Year",
+  "Population",
+  "Share (%)",
+  "Annual Growth (%)",
+  "Inter-censal Change (%)",
+  "Area (km2)",
+  "Density (persons per km2)"
  ]];
 
+
  selectedLGAs().forEach(lga=>{
-  const d=DATA[lga];
+
+  const d = DATA[lga];
+
   rows.push([
-   lga,year(),val(lga,"pop",i)??"",
-   val(lga,"share",i)??"",val(lga,"growth",i)??"",
-   val(lga,"change",i)??"",d.area??"",
-   val(lga,"density",i)??""
+
+   lga,
+   year(),
+   val(lga,"pop",i) ?? "",
+   val(lga,"share",i) ?? "",
+   val(lga,"growth",i) ?? "",
+   val(lga,"change",i) ?? "",
+   d.area ?? "",
+   val(lga,"density",i) ?? ""
+
   ]);
+
  });
 
- const csv=rows.map(row=>row.map(v=>
-  '"'+String(v).replace(/"/g,'""')+'"'
- ).join(",")).join("\r\n");
 
- const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;a.download="GBoS_Gambia_Population_"+year()+".csv";
- a.click();URL.revokeObjectURL(url);
+ const csv = rows.map(row=>
+  row.map(value=>
+   '"'+String(value).replace(/"/g,'""')+'"'
+  ).join(",")
+ ).join("\r\n");
+
+
+ const blob = new Blob(
+  ["\uFEFF"+csv],
+  {type:"text/csv;charset=utf-8"}
+ );
+
+ const url = URL.createObjectURL(blob);
+
+ const a = document.createElement("a");
+
+ a.href = url;
+ a.download = "GBoS_Gambia_Population_"+year()+".csv";
+
+ a.click();
+
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+
 }
 
+
 // ==========================================================
-// 14. LOAD GEOJSON
+// 18. LOAD GEOJSON
 // ==========================================================
 
 async function loadGeoJSON(url){
- $("loadStatus").textContent="Loading census GeoJSON...";
- try{
-  const response=await fetch(url);
-  if(!response.ok)throw new Error("HTTP "+response.status);
-  const data=await response.json();
 
-  if(data.type!=="FeatureCollection"||!Array.isArray(data.features)){
-   throw new Error("The file is not a GeoJSON FeatureCollection.");
+ $("loadStatus").textContent =
+  "Loading census GeoJSON...";
+
+ try{
+
+  const response = await fetch(url);
+
+  if(!response.ok){
+   throw new Error("HTTP "+response.status);
   }
 
-  geoData=data;
+  const data = await response.json();
+
+  if(
+   data.type!=="FeatureCollection" ||
+   !Array.isArray(data.features)
+  ){
+   throw new Error(
+    "The file is not a GeoJSON FeatureCollection."
+   );
+  }
+
+  geoData = data;
+
   build2024LGAData();
+
   calculate2024();
 
-  $("loadStatus").textContent=
-   "GeoJSON loaded successfully • "+fmt(data.features.length)+" features.";
+
+  const areaCount = LGAS.filter(lga=>
+   DATA[lga].area!==null &&
+   DATA[lga].area>0
+  ).length;
+
+  const densityCount = LGAS.filter(lga=>
+   DATA[lga].density[5]!==null &&
+   Number.isFinite(DATA[lga].density[5])
+  ).length;
+
+
+  $("loadStatus").textContent =
+   "GeoJSON loaded • "+
+   fmt(data.features.length)+" features • "+
+   areaCount+"/8 LGAs with area • "+
+   densityCount+"/8 LGAs with 2024 density.";
+
 
   render();
+
  }catch(error){
-  $("loadStatus").textContent=
+
+  $("loadStatus").textContent =
    "GeoJSON loading failed: "+error.message+
-   ". Check repository file name, internet access or upload the file manually.";
+   ". Check the repository file name, internet access or upload the file manually.";
+
+  console.error(error);
+
  }
+
 }
 
+
 // ==========================================================
-// 15. UPLOAD ALTERNATIVE GEOJSON
+// 19. UPLOAD ALTERNATIVE GEOJSON
 // ==========================================================
 
 $("geojsonUpload").addEventListener("change",event=>{
- const file=event.target.files[0];
- if(!file)return;
- const reader=new FileReader();
+
+ const file = event.target.files[0];
+
+ if(!file) return;
+
+ const reader = new FileReader();
+
  reader.onload=e=>{
+
   try{
-   const parsed=JSON.parse(e.target.result);
-   if(parsed.type!=="FeatureCollection")throw new Error("Invalid FeatureCollection");
-   geoData=parsed;
+
+   const parsed = JSON.parse(e.target.result);
+
+   if(
+    parsed.type!=="FeatureCollection" ||
+    !Array.isArray(parsed.features)
+   ){
+    throw new Error("Invalid GeoJSON FeatureCollection");
+   }
+
+   geoData = parsed;
+
+   // Recalculate all 2024 LGA areas and densities.
    build2024LGAData();
+
    calculate2024();
-   $("loadStatus").textContent="Uploaded "+file.name+" • "+fmt(parsed.features.length)+" features.";
+
+
+   const areaCount = LGAS.filter(lga=>
+    DATA[lga].area!==null &&
+    DATA[lga].area>0
+   ).length;
+
+   const densityCount = LGAS.filter(lga=>
+    DATA[lga].density[5]!==null &&
+    Number.isFinite(DATA[lga].density[5])
+   ).length;
+
+
+   $("loadStatus").textContent =
+    "Uploaded "+file.name+
+    " • "+fmt(parsed.features.length)+" features"+
+    " • "+areaCount+"/8 LGA areas"+
+    " • "+densityCount+"/8 LGA densities";
+
+
    render();
+
   }catch(error){
-   $("loadStatus").textContent="Upload error: "+error.message;
+
+   $("loadStatus").textContent =
+    "Upload error: "+error.message;
+
   }
+
  };
+
  reader.readAsText(file);
+
 });
 
+
 // ==========================================================
-// 16. EVENTS
+// 20. EVENT LISTENERS
 // ==========================================================
 
 $("applyBtn").addEventListener("click",render);
+
 $("yearSelect").addEventListener("change",render);
+
 $("lgaSelect").addEventListener("change",render);
+
 $("indicatorSelect").addEventListener("change",render);
+
 $("csvBtn").addEventListener("click",exportCSV);
 
+
 $("resetBtn").addEventListener("click",()=>{
- $("yearSelect").value="2013";
- $("lgaSelect").value="All";
- $("indicatorSelect").value="population";
- $("basemapSelect").value="street";
+
+ $("yearSelect").value = "2013";
+
+ $("lgaSelect").value = "All";
+
+ $("indicatorSelect").value = "population";
+
+ $("basemapSelect").value = "street";
+
+
  Object.values(basemaps).forEach(layer=>{
-  if(map.hasLayer(layer))map.removeLayer(layer);
+
+  if(map.hasLayer(layer)){
+   map.removeLayer(layer);
+  }
+
  });
+
  basemaps.street.addTo(map);
+
  render();
+
 });
+
 
 $("fitBtn").addEventListener("click",()=>{
+
  if(geoLayer){
-  try{map.fitBounds(geoLayer.getBounds(),{padding:[15,15]});}
-  catch(e){}
+
+  try{
+
+   const bounds = geoLayer.getBounds();
+
+   if(bounds.isValid()){
+    map.fitBounds(bounds,{padding:[15,15]});
+   }
+
+  }catch(error){
+   console.warn(error);
+  }
+
  }
+
 });
+
 
 $("clearBtn").addEventListener("click",()=>{
- if(geoLayer){map.removeLayer(geoLayer);geoLayer=null;}
- $("mapLegend").textContent="Map layer cleared.";
+
+ if(geoLayer){
+
+  map.removeLayer(geoLayer);
+
+  geoLayer = null;
+
+ }
+
+ $("mapLegend").textContent = "Map layer cleared.";
+
 });
 
+
 // ==========================================================
-// 17. START APPLICATION
+// 21. START APPLICATION
 // ==========================================================
 
 populateLGASelect();
+
 render();
+
 loadGeoJSON(GEOJSON_URL);
 
+
+// ==========================================================
+// 22. RESPONSIVE MAP AND CHART RESIZING
+// ==========================================================
+
 window.addEventListener("resize",()=>{
+
  map.invalidateSize();
- Object.values(charts).forEach(chart=>chart.resize());
+
+ Object.values(charts).forEach(chart=>{
+  chart.resize();
+ });
+
 });
+
 
 window.addEventListener("load",()=>{
+
  setTimeout(()=>{
+
   map.invalidateSize();
-  Object.values(charts).forEach(chart=>chart.resize());
+
+  Object.values(charts).forEach(chart=>{
+   chart.resize();
+  });
+
  },400);
+
 });
 
+
 if(typeof ResizeObserver!=="undefined"){
- const observer=new ResizeObserver(()=>{
+
+ const observer = new ResizeObserver(()=>{
+
   map.invalidateSize();
-  Object.values(charts).forEach(chart=>chart.resize());
+
+  Object.values(charts).forEach(chart=>{
+   chart.resize();
+  });
+
  });
+
  observer.observe($("map"));
+
 }
+
 </script>
+
 </body>
 </html>
+
